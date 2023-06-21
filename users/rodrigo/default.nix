@@ -28,6 +28,9 @@
         unzip
         wget
       ];
+      file = {
+      	".yocto/site.conf".source = ./yocto/site.conf;
+      };
 
       stateVersion = "23.05";
     };
@@ -48,6 +51,9 @@
     programs.git = {
       enable = true;
 
+      userName = "Rodrigo M. Duarte";
+      userEmail = "rodrigo.duarte@ossystems.com.br";
+
       delta = {
         enable = true;
         options.syntax-theme = "base16-256";
@@ -60,8 +66,9 @@
 
     programs.ssh = {
       enable = true;
-
       extraConfig = ''
+        Host code.ossystems.com.br
+	    User mdrodrigo
         Host *.ossystems.com.br
             HostkeyAlgorithms +ssh-rsa
             PubkeyAcceptedAlgorithms +ssh-rsa
