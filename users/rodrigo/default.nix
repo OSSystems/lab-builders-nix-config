@@ -29,7 +29,7 @@
         wget
       ];
       file = {
-      	".yocto/site.conf".source = ./yocto/site.conf;
+        ".yocto/site.conf".source = ./yocto/site.conf;
       };
 
       stateVersion = "23.05";
@@ -60,8 +60,57 @@
       tmux.enableShellIntegration = true;
     };
 
+    # Configure the nvim plugins
     programs.neovim = {
       enable = true;
+      plugins = with pkgs.vimPlugins; [
+        auto-pairs
+        bitbake-vim
+        fzf-vim
+        gruvbox
+        nerdtree
+        toggleterm-nvim
+        vim-airline
+        vim-airline-themes
+        vim-devicons
+        vim-fugitive
+      ];
+      extraConfig = ''
+        set number
+        set background=dark
+
+        " Airline
+        let g:airline_powerline_fonts = 1
+
+        "Gruvbox
+        let g:gruvbox_italic=1
+        let g:gruvbox_contrast_dark = 'hard'
+        autocmd vimenter * ++nested colorscheme gruvbox
+
+        " Always show the signcolumn, otherwise it would shift the text each time
+        " diagnostics appear/become resolved.
+        if has("nvim-0.5.0") || has("patch-8.1.1564")
+          " Recently vim can merge signcolumn and number column into one
+          set signcolumn=number
+        else
+          set signcolumn=yes
+        endif
+
+        " NERDTreeToggle
+        nnoremap <silent><C-t> :NERDTreeToggle<CR>
+
+        " ToggleTerm
+        lua require("toggleterm").setup()
+        nnoremap <silent><M-t> :ToggleTerm<CR>
+
+        " FZF open command
+        nnoremap <silent><C-f> :FZF<CR>
+
+        " Identation configs
+        set expandtab
+        set tabstop=4
+        set shiftwidth=4
+      '';
     };
 
     programs.git = {
@@ -77,7 +126,7 @@
 
       extraConfig = {
         core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
-	    core.editor = "nvim";
+        core.editor = "nvim";
       };
     };
 
@@ -85,7 +134,8 @@
       enable = true;
       extraConfig = ''
         Host code.ossystems.com.br
-	    User mdrodrigo
+            User mdrodrigo
+        
         Host *.ossystems.com.br
             HostkeyAlgorithms +ssh-rsa
             PubkeyAcceptedAlgorithms +ssh-rsa
