@@ -35,7 +35,23 @@
       stateVersion = "23.05";
     };
 
-    programs.bash.enable = true;
+    # set the bash configurations
+    programs.bash = {
+      enable = true;
+      bashrcExtra = ''
+        parse_git_branch() {
+            git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+        }
+        export PS1="\[\033[01;32m\]\u@\[\033[00m\]\[\033[01;35m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\e[91m\]\$(parse_git_branch)\[\e[00m\]$ "
+      '';
+      shellAliases = {
+        # Insecure SSH and SCP aliases. I use this to connect to temporary devices
+        # such as embedded devices under test or development so we don't need to
+        # delete the fingerprint every time we reinstall them.
+        issh = "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null";
+        iscp = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null";
+      };
+    };
 
     programs.fzf = {
       enable = true;
@@ -61,6 +77,7 @@
 
       extraConfig = {
         core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
+	    core.editor = "nvim";
       };
     };
 
