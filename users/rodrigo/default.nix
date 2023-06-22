@@ -61,57 +61,71 @@
     };
 
     # Configure the nvim plugins
-    programs.neovim = {
-      enable = true;
-      plugins = with pkgs.vimPlugins; [
-        auto-pairs
-        bitbake-vim
-        fzf-vim
-        gruvbox
-        nerdtree
-        toggleterm-nvim
-        vim-airline
-        vim-airline-themes
-        vim-devicons
-        vim-fugitive
-      ];
-      extraConfig = ''
-        set number
-        set background=dark
+    programs.neovim =
+      let
+        bitbake-vim = pkgs.vimUtils.buildVimPluginFrom2Nix {
+          pname = "bitbake-vim";
+          version = "unstable-2022-04-08";
+          src = pkgs.fetchFromGitHub {
+            owner = "kergoth";
+            repo = "vim-bitbake";
+            rev = "0a229746e4a8e9c5b3b4666e9452dec2cbe69c9b";
+            hash = "sha256-9WRRpOZ/Qs2nckAzV1UqM3O7DXVhiyuVo1kFotiWqcc=";
+          };
+        };
+      in
+      {
+        enable = true;
+        coc.enable = true;
+        plugins = with pkgs.vimPlugins; [
+          auto-pairs
+          bitbake-vim
+          fzf-vim
+          gruvbox
+          nerdtree
+          toggleterm-nvim
+          vim-airline
+          vim-airline-themes
+          vim-devicons
+          vim-fugitive
+        ];
+        extraConfig = ''
+          set number
+          set background=dark
 
-        " Airline
-        let g:airline_powerline_fonts = 1
+          " Airline
+          let g:airline_powerline_fonts = 1
 
-        "Gruvbox
-        let g:gruvbox_italic=1
-        let g:gruvbox_contrast_dark = 'hard'
-        autocmd vimenter * ++nested colorscheme gruvbox
+          "Gruvbox
+          let g:gruvbox_italic=1
+          let g:gruvbox_contrast_dark = 'hard'
+          autocmd vimenter * ++nested colorscheme gruvbox
 
-        " Always show the signcolumn, otherwise it would shift the text each time
-        " diagnostics appear/become resolved.
-        if has("nvim-0.5.0") || has("patch-8.1.1564")
-          " Recently vim can merge signcolumn and number column into one
-          set signcolumn=number
-        else
-          set signcolumn=yes
-        endif
+          " Always show the signcolumn, otherwise it would shift the text each time
+          " diagnostics appear/become resolved.
+          if has("nvim-0.5.0") || has("patch-8.1.1564")
+            " Recently vim can merge signcolumn and number column into one
+            set signcolumn=number
+          else
+            set signcolumn=yes
+          endif
 
-        " NERDTreeToggle
-        nnoremap <silent><C-t> :NERDTreeToggle<CR>
+          " NERDTreeToggle
+          nnoremap <silent><C-t> :NERDTreeToggle<CR>
 
-        " ToggleTerm
-        lua require("toggleterm").setup()
-        nnoremap <silent><M-t> :ToggleTerm<CR>
+          " ToggleTerm
+          lua require("toggleterm").setup()
+          nnoremap <silent><M-t> :ToggleTerm<CR>
 
-        " FZF open command
-        nnoremap <silent><C-f> :FZF<CR>
+          " FZF open command
+          nnoremap <silent><C-f> :FZF<CR>
 
-        " Identation configs
-        set expandtab
-        set tabstop=4
-        set shiftwidth=4
-      '';
-    };
+          " Identation configs
+          set expandtab
+          set tabstop=4
+          set shiftwidth=4
+        '';
+      };
 
     programs.git = {
       enable = true;
