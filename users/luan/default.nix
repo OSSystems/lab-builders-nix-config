@@ -57,7 +57,7 @@
 
       extraConfig = {
         core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
-        core.editor = "nvim"; 
+        core.editor = "nvim";
       };
     };
 
