@@ -65,6 +65,9 @@
       enable = true;
 
       extraConfig = ''
+        Host code.ossystems.com.br
+            User raflian
+
         Host *.ossystems.com.br
             HostkeyAlgorithms +ssh-rsa
             PubkeyAcceptedAlgorithms +ssh-rsa
