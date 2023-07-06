@@ -47,6 +47,9 @@
     programs.git = {
       enable = true;
 
+      userName = "Luan Rafael Carneiro";
+      userEmail = "luan.rafael@ossystems.com.br";
+
       delta = {
         enable = true;
         options.syntax-theme = "base16-256";
@@ -54,6 +57,7 @@
 
       extraConfig = {
         core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
+        core.editor = "nvim"; 
       };
     };
 
