@@ -11,5 +11,5 @@
   fonts.fontconfig.enable = lib.mkDefault false;
 
   # No need for sound on a server
-  sound.enable = false;
+  sound.enable = true;
 }

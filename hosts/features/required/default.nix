@@ -30,7 +30,6 @@
 
   environment.systemPackages = with pkgs; [
     host-scripts
-    ossystems-tools
   ];
 
   system.stateVersion = "23.05";

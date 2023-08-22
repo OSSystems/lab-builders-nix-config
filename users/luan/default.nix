@@ -5,7 +5,7 @@
     description = "Luan Rafael Carneiro";
 
     isNormalUser = true;
-    extraGroups = [ "docker" "wheel" ];
+    extraGroups = [ "docker" "wheel" "audio" "sound" "vboxusers" ];
 
     openssh.authorizedKeys.keys = [
       "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDmnGmiCI8Izo/oIV1AXNcI/9sytYJEPcuc1u4dXNmLqKTvN76UTstp7HlNHu5wWEZaOrKKiB14U8aY+z1hPlW9VwMZWPyrJKpvBe433Tc1RWPg60iT1Hyoor6y9ja/YmeUDzc5GN+4LylOboE3YkI/AI+uhwIha0Hw7KAxQBsg6syiFPAraCgtO3VCosBzpNVxHDD9Ls6+Tk8E2ZRtdE6Wvx/0yc5+LkKdvTbTnBOpFr7dc1IVTtCtu/n3yHnpmoMMUe4qpI2nAYypX2u8KvywtTsvGXBK96HPfDgCqaqFAXtesZBhPBlY4l+qLiqFHjiQB0YVPgaPD0PIrq9XvUgN6gYBEQR+1GtDBiqzVxlrPvgSmIP0uxCiWVCr26KgETG4V3FICjOWPdKPt0Byc2JOo9fYvVOae8qM2Auc91YNFyHOXbd5tQF0tF3HCn/sY7VZBJTrYp6lQl0BEKvgxZVL5Pq+dE9jyR74Lwh3ETxEiy4nYmdvFsGcYzo/82LkmhE= luan@arch"
@@ -18,9 +18,20 @@
   home-manager.users.luan = {
     home = {
       packages = with pkgs; [
+        alacritty 
+        anydesk
+        bmap-tools
+        brave
+        discord
+        flameshot
         gitRepo
+        google-chrome
         htop
+        minicom
         nmap
+        obsidian
+        parcellite
+        spotify
         tmux
         tmuxp
         tree
@@ -50,11 +61,6 @@
       userName = "Luan Rafael Carneiro";
       userEmail = "luan.rafael@ossystems.com.br";
 
-      delta = {
-        enable = true;
-        options.syntax-theme = "base16-256";
-      };
-
       extraConfig = {
         core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
         core.editor = "nvim";
@@ -67,9 +73,14 @@
       extraConfig = ''
         Host code.ossystems.com.br
             HostName code.ossystems.io
+            User raflian
 
         Host code.ossystems.io
             User raflian
+
+        Host *.ossystems.com.br
+            HostkeyAlgorithms +ssh-rsa
+            PubkeyAcceptedAlgorithms +ssh-rsa
 
         Host *.lab.ossystems
             ForwardAgent yes
