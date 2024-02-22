@@ -13,6 +13,7 @@
     ../features/optional/pipewire.nix
     ../features/optional/quietboot.nix
     ../features/optional/x11.nix
+    ../features/optional/zerotier.nix
 
     ./partitioning.nix
   ];
@@ -29,5 +30,5 @@
 
   boot.extraModprobeConfig = ''
     options snd-intel-dspcfg dsp_driver=1
-  ''; 
+  '';
 }
