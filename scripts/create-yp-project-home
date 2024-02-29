@@ -5,26 +5,25 @@ release=$2
 yocto_env=$3
 
 if [ -z $project_name ] || [ -z $release ]; then
-    echo "Invalid usage. Please check if you're using this correctly:"
-    cat <<EOF
+	echo "Invalid usage. Please check if you're using this correctly:"
+	cat <<EOF
 $0 <project_name> <release>
 EOF
-    exit 1
+	exit 1
 fi
 
 mkdir -p $HOME/.tmuxp
 
 tmuxp_profile="$HOME/.tmuxp/$project_name-$release.yaml"
-project_home="$HOME/src/oe/$project_name/$release"
-
+project_home="$HOME/src/customers/$project_name/$release"
 
 if [ -e "$tmuxp_profile" ]; then
-    echo "INFO: $tmuxp_profile already has been overridden."
+	echo "INFO: $tmuxp_profile already has been overridden."
 fi
 
 [ -n "$yocto_env" ] || yocto_env=20.04
 
-cat > $tmuxp_profile << EOF
+cat >$tmuxp_profile <<EOF
 session_name: $(echo $project_name-$release | tr '.' '-')
 start_directory: $project_home
 windows:
@@ -50,4 +49,3 @@ Project home create. Go there using:
 
 cd $project_home
 EOF
-

@@ -1,8 +1,6 @@
 _:
 
 {
-  additions = final: _: import ../pkgs { pkgs = final; };
-
   modifications = _: prev: {
     fzf = prev.fzf.overrideAttrs (oa: {
       # https://github.com/NixOS/nixpkgs/pull/226847

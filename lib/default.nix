@@ -13,8 +13,6 @@
       };
 
       modules = [
-        inputs.disko.nixosModules.disko
-
         ../hosts/${hostname}
         {
           networking.hostName = hostname;
@@ -35,10 +33,6 @@
       };
 
       modules = [
-        inputs.disko.nixosModules.disko
-
-        ../hosts/installer
-
         {
           networking.hostName = hostname;
         }

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ ... }:
 
 {
   imports = [
@@ -19,17 +19,9 @@
     ./openssh.nix
     ./sudo.nix
     ./upgrade-diff.nix
-    ./vscode-server.nix
     ./watchdog.nix
 
-    ../../../users/aquino
     ../../../users/luan
-    ../../../users/otavio
-    ../../../users/rodrigo
-  ];
-
-  environment.systemPackages = with pkgs; [
-    host-scripts
   ];
 
   system.stateVersion = "23.05";

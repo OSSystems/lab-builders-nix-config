@@ -15,6 +15,10 @@
     password = "pw";
   };
 
+  nixpkgs.config.permittedInsecurePackages = [
+    "electron-25.9.0"
+  ];
+
   home-manager.users.luan = {
     home = {
       packages = with pkgs; [
@@ -27,7 +31,6 @@
         gitlab-runner
         flameshot
         gcc-arm-embedded
-        gcc
         ripgrep
         gitRepo
         google-chrome
@@ -39,7 +42,6 @@
         nmap
         nodePackages.bash-language-server
         nxpmicro-mfgtools
-        ossystems-tools
         obsidian
         parcellite
         python3
@@ -51,6 +53,7 @@
         usbutils
         unzip
         wget
+        stm32cubemx
       ];
 
       stateVersion = "23.05";
@@ -118,4 +121,5 @@
       '';
     };
   };
+
 }
