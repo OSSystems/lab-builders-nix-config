@@ -27,6 +27,7 @@
         tree
         unzip
         wget
+        openfortivpn
       ];
       file = {
         ".yocto/site.conf".source = ./yocto/site.conf;
@@ -63,7 +64,7 @@
     # Configure the nvim plugins
     programs.neovim =
       let
-        bitbake-vim = pkgs.vimUtils.buildVimPluginFrom2Nix {
+        bitbake-vim = pkgs.vimUtils.buildVimPlugin {
           pname = "bitbake-vim";
           version = "unstable-2022-04-08";
           src = pkgs.fetchFromGitHub {
