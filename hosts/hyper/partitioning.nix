@@ -22,21 +22,12 @@
             {
               name = "root";
               start = "512MiB";
-              end = "8192MiB";
+              end = "100%";
               part-type = "primary";
               content = {
                 type = "filesystem";
                 format = "ext4";
                 mountpoint = "/";
-              };
-            }
-            {
-              name = "swap";
-              start = "-8192MiB";
-              end = "100%";
-              part-type = "primary";
-              content = {
-                type = "swap";
               };
             }
           ];
