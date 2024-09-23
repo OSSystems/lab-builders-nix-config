@@ -173,6 +173,9 @@
             ForwardAgent yes
             ForwardX11 yes
             ForwardX11Trusted yes
+
+        Host git-codecommit.*.amazonaws.com
+            User APKA6GBMEPVHOKCNZQWD
       '';
     };
   };
