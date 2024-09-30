@@ -6,7 +6,7 @@
     common-pc-ssd
   ] ++ [
     ../features/required
-
+    ../features/zram-swap.nix
     ./partitioning.nix
   ];
 
