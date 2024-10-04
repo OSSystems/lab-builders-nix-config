@@ -28,6 +28,7 @@
         unzip
         wget
         openfortivpn
+        kas
       ];
       file = {
         ".yocto/site.conf".source = ./yocto/site.conf;
