@@ -19,16 +19,17 @@
   home-manager.users.rodrigo = {
     home = {
       packages = with pkgs; [
+        bintools
         gitRepo
         htop
+        kas
         nmap
+        openfortivpn
         tmux
         tmuxp
         tree
         unzip
         wget
-        openfortivpn
-        kas
       ];
       file = {
         ".yocto/site.conf".source = ./yocto/site.conf;
