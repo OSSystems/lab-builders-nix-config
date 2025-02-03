@@ -22,7 +22,6 @@
     ./vscode-server.nix
     ./watchdog.nix
 
-    ../../../users/abner
     ../../../users/aquino
     ../../../users/otavio
     ../../../users/rodrigo
