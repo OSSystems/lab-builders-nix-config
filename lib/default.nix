@@ -15,6 +15,8 @@
       modules = [
         inputs.disko.nixosModules.disko
 
+        ../nixos/modules/bitbake.nix
+
         ../hosts/${hostname}
         {
           networking.hostName = hostname;
