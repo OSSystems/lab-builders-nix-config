@@ -25,6 +25,7 @@
     ../../../users/aquino
     ../../../users/otavio
     ../../../users/rodrigo
+    ../../../users/noreng
   ];
 
   environment.systemPackages = with pkgs; [
