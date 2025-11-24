@@ -29,6 +29,7 @@
         tmuxp
         tree
         unzip
+        vim-full
         wget
       ];
       file = {
