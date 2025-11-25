@@ -31,6 +31,8 @@
         unzip
         vim-full
         wget
+        wl-clipboard
+        xclip
       ];
       file = {
         ".yocto/site.conf".source = ./yocto/site.conf;
