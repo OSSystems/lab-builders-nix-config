@@ -33,6 +33,7 @@
         wget
         wl-clipboard
         xclip
+        xsel
       ];
       file = {
         ".yocto/site.conf".source = ./yocto/site.conf;
@@ -147,7 +148,7 @@
       enable = true;
 
       userName = "noreng-br";
-      userEmail = "contato@nor.eng.br";
+      userEmail = "vagner.nornberg@ossystems.com.br";
 
       delta = {
         enable = true;
@@ -156,7 +157,7 @@
 
       extraConfig = {
         core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
-        core.editor = "nvim";
+        core.editor = "vim";
       };
     };
 
