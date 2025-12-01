@@ -8,7 +8,7 @@
     extraGroups = [ "docker" "wheel" ];
 
     openssh.authorizedKeys.keys = [
-      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCq6NT2ArJLFKL6rTI1yXP45PDaHLCPTpPw8jcAH1/AKJoOzYOj7KN6Z0gk6R2yuX9FMXsQ89i00QB7w0fKCBajblXejTvwW9XLPY1SrhEQXoCQrEN/271v/QxoW8cAL6jUPUr+tX4LWF77G71663DN+MxjrmbRrU3AdzDEJjwg/ntig6fSnvmA4AmGupcl+KuACmgFHFItsNMuGxJyFNStOv9GZbaWbmVkGPsjv/mRBsa8QRtIRXqUB1/KBxT9t9/34dqY/mCcfVo4zApAAkN0DKNvDKyDD0FyZ9EZm3/cW6iDwz8on+TNcf0squcr/C2GVVSBspp5ItOJQmXvbwcT0SQmX9D0+46oSy5o+YwckT74p3yI8rsa0adkDzukcLVXQbRYcZqvssfYETUo/cgjhg1z4a+RnZwik/2zLZrRCoV+eBIiXL4OZfFKZt1ZzpjDcPhNMPv6thshsgCpoYgWt///cC7iPH9JyhtNfZGlnq2weIBjnMhqfQkMJXp8ams= noreng@noreng"
+      "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCvjRqx3Izbx/qQrsTIeHh+NzTvMFlnvFN1sjkgREnsWePb/UpvwVKmYRbxILekQu4t9XaNFou92IEqwS+1Gd73IXmVmgLGeR3E7+pyWXx4/pOZg12zok17o8p+b40P/RzVCA6Uj8yaGIOt2CRlff+5mgZqgO/AmZcGQxugBynHsG/Bh4J6jAt7HKXh6uYXsCY3DmIvSuGQfoxBRHReqSig+NoJqELPvUP4rLE8XsoqcoBJRwYaTnlaGRAxvegaOt8q32JRPrJC11SLk2G/YT4pCTzs+D01yISWsGck9eRHz4VUROsyqXILnfw56eShv4sEdVp5AApTHXMPSRp4kANKcy/h7jiqn1fCVwIgsyDFIkJPOs0NSBJCJTA0JwlzO67y0lFdZQWMZgzPGKD5OAj194F0qVzpMoedtLik+VaDS5ZqokH6C1RYZc9BDp39kcoRAmlAMiwOVn2RxSZ5BQrMbTVkEwm16eMaDqs5sIRGmmGZnK+NZFcOneFp4jPivQk= noreng@noreng"
     ];
 
     # Default - used for bootstrapping.
