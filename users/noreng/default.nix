@@ -25,6 +25,7 @@
         nmap
         oelint-adv
         openfortivpn
+        silver-searcher
         tmux
         tmuxp
         tree
