@@ -55,7 +55,7 @@
     enable = true;
     versions = {
       "scarthgap" = {
-        package = pkgs.bitbakePackages.bitbake_2_8_7;
+        package = pkgs.bitbakePackages.bitbake_2_8_0;
         hashServPort = 8686;
         prServPort = 8685;
       };
