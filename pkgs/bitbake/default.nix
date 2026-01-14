@@ -40,9 +40,9 @@ let
       } // attrs');
 in
 rec {
-  bitbake_2_8_7 = mkBitbake {
-    version = "2.8.7";
-    hash = "sha256-Pk/s4Drdw8ZAFb1Wn7RkAHoy2ZH3R2H3WPL1JD7ZEmA=";
+  bitbake_2_8_0 = mkBitbake {
+    version = "2.8.0";
+    hash = "sha256-wrI+SaS3g15i8EyR76CN8ZNKtVm9+TefUMP1/8Avx64=";
   };
 
   bitbake_2_10_2 = mkBitbake {
