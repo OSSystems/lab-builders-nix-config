@@ -7,6 +7,8 @@
     "${modulesPath}/installer/cd-dvd/installation-cd-base.nix"
   ];
 
+  services.openssh.settings.PermitRootLogin = "yes";
+
   isoImage = {
     compressImage = false;
     squashfsCompression = "zstd -Xcompression-level 1";
