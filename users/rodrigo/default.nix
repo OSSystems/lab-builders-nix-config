@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs,inputs, ... }:
 
 {
   users.users.rodrigo = {
@@ -16,8 +16,18 @@
     password = "pw";
   };
 
+home-manager.extraSpecialArgs = {
+              inherit inputs;
+    };
+
+
   home-manager.users.rodrigo = {
+    imports = [
+            ./features/claude-code
+    ];
+
     home = {
+
       packages = with pkgs; [
         bintools
         gitRepo
@@ -167,6 +177,7 @@
 
         Host code.ossystems.io
             User mdrodrigo
+            WarnWeakCrypto no
         
         Host *.ossystems.com.br
             HostkeyAlgorithms +ssh-rsa

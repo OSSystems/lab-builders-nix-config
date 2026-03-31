@@ -1,5 +1,25 @@
 {
   "nodes": {
+    "claude-code-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1774260659,
+        "narHash": "sha256-r4GMKyV09aERY4ly3onTwR5u11SXxAZ3T8W9h8Tuj7Y=",
+        "owner": "ryoppippi",
+        "repo": "claude-code-overlay",
+        "rev": "0a3a4e637546d2cdb0bc46d29a5fda476a631a1f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ryoppippi",
+        "repo": "claude-code-overlay",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": "nixpkgs"
@@ -134,6 +154,7 @@
     },
     "root": {
       "inputs": {
+        "claude-code-overlay": "claude-code-overlay",
         "disko": "disko",
         "home-manager": "home-manager",
         "nixos-hardware": "nixos-hardware",
