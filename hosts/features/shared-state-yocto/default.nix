@@ -6,6 +6,7 @@
 
   users.users.rodrigo.extraGroups = [ "builder" ];
   users.users.otavio.extraGroups = [ "builder" ];
+  users.users.luciano.extraGroups = ["builder"];
 
   system.activationScripts.srv =
     ''
