@@ -27,6 +27,7 @@
     ../../../users/aquino
     ../../../users/otavio
     ../../../users/rodrigo
+    ../../../users/luciano
   ];
 
   environment.systemPackages = [
