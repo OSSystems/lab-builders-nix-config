@@ -45,8 +45,8 @@ rec {
     hash = "sha256-wrI+SaS3g15i8EyR76CN8ZNKtVm9+TefUMP1/8Avx64=";
   };
 
-  bitbake_2_10_2 = mkBitbake {
-    version = "2.10.2";
-    hash = "sha256-cLlJkGva00m4L67AoHQQi3k2SSLSTbtF34WMDz8AKK4=";
+  bitbake_2_10_0 = mkBitbake {
+    version = "2.10.0";
+    hash = "sha256-FyC9tJTToY42526WUtjxY5DTLO19PkuJjtlwdhIvNEA=";
   };
 }

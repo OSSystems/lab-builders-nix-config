@@ -60,7 +60,7 @@
         prServPort = 8685;
       };
       "styhead" = {
-        package = pkgs.bitbakePackages.bitbake_2_10_2;
+        package = pkgs.bitbakePackages.bitbake_2_10_0;
         hashServPort = 8786;
         prServPort = 8785;
       };
