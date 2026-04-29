@@ -23,6 +23,7 @@
     ./watchdog.nix
 
     ../../../users/aquino
+    ../../../users/gabriel
     ../../../users/otavio
     ../../../users/rodrigo
   ];
