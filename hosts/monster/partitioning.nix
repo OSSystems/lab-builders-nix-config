@@ -1,14 +1,13 @@
 {
   disko.devices.disk.main = {
     type = "disk";
-    device = "/dev/nvme0n1";
+    device = "/dev/sda";
     content = {
       type = "gpt";
       partitions = {
         ESP = {
           label = "ESP";
-          start = "1MiB";
-          end = "512MiB";
+          size = "512M";
           type = "EF00";
           content = {
             type = "filesystem";
@@ -19,8 +18,7 @@
         };
         root = {
           label = "root";
-          start = "512MiB";
-          end = "100%";
+          size = "100%";
           content = {
             type = "filesystem";
             format = "ext4";
