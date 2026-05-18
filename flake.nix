@@ -39,6 +39,11 @@
           hostname = "pikachu";
           system = "x86_64-linux";
         };
+        monster = mkSystem {
+          hostname = "monster";
+          system = "x86_64-linux";
+        };
+
       };
 
       packages = builtins.foldl'
