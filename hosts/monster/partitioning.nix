@@ -5,16 +5,10 @@
     content = {
       type = "gpt";
       partitions = {
-        ESP = {
-          label = "ESP";
-          size = "512M";
-          type = "EF00";
-          content = {
-            type = "filesystem";
-            format = "vfat";
-            mountpoint = "/boot";
-
-          };
+        boot = {
+          label = "boot";
+          size = "1M";
+          type = "EF02";
         };
         root = {
           label = "root";

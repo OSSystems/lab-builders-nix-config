@@ -12,8 +12,7 @@
   ];
 
   boot = {
-    loader.systemd-boot.enable = true;
-    loader.efi.canTouchEfiVariables = true;
+    loader.grub.enable = true;
 
     initrd = {
       availableKernelModules = [ "nvme" "xhci_pci" "usbhid" ];
