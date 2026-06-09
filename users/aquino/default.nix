@@ -28,7 +28,7 @@
         gitRepo
       ];
 
-      stateVersion = "23.05";
+      stateVersion = "26.05";
     };
 
     programs.bash.enable = true;
@@ -40,31 +40,35 @@
       tmux.enableShellIntegration = true;
     };
 
+    programs.delta = {
+      enable = true;
+      enableGitIntegration = true;
+      options.syntax-theme = "base16-256";
+    };
+
     programs.git = {
       enable = true;
 
-      delta = {
-        enable = true;
-        options.syntax-theme = "base16-256";
-      };
-
-      extraConfig = {
+      settings = {
         core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
       };
     };
 
     programs.ssh = {
       enable = true;
+      enableDefaultConfig = false;
 
-      extraConfig = ''
-        Host code.ossystems.com.br
-            HostName code.ossystems.io
-
-        Host *.lab.ossystems
-            ForwardAgent yes
-            ForwardX11 yes
-            ForwardX11Trusted yes
-      '';
+      settings = {
+        "*" = { };
+        "code.ossystems.com.br" = {
+          Hostname = "code.ossystems.io";
+        };
+        "*.lab.ossystems" = {
+          ForwardAgent = true;
+          ForwardX11 = true;
+          ForwardX11Trusted = true;
+        };
+      };
     };
   };
 }

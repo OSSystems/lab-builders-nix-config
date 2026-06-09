@@ -19,14 +19,6 @@
   boot.supportedFilesystems = pkgs.lib.mkForce
     [ "btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs" ];
 
-  # The global useDHCP flag is deprecated, therefore explicitly set to false here.
-  # Per-interface useDHCP will be mandatory in the future, so this generated config
-  # replicates the default behaviour.
-  networking.useDHCP = false;
-
-  networking.wireless.enable = false;
-  networking.networkmanager.enable = true;
-
   disko.enableConfig = false;
   environment.systemPackages = with pkgs; [
     zile

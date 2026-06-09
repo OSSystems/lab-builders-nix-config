@@ -5,7 +5,6 @@
     ./auto-upgrade.nix
     ./console.nix
     ./disable-desktop-features.nix
-    ./disable-global-dhcp.nix
     ./disk-scheduler.nix
     ./docker.nix
     ./firmware.nix
@@ -32,5 +31,5 @@
     ossystems-tools
   ];
 
-  system.stateVersion = "23.05";
+  system.stateVersion = "26.05";
 }

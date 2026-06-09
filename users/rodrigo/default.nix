@@ -1,4 +1,4 @@
-{ pkgs,inputs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   users.users.rodrigo = {
@@ -16,14 +16,14 @@
     password = "pw";
   };
 
-home-manager.extraSpecialArgs = {
-              inherit inputs;
-    };
+  home-manager.extraSpecialArgs = {
+    inherit inputs;
+  };
 
 
   home-manager.users.rodrigo = {
     imports = [
-            ./features/claude-code
+      ./features/claude-code
     ];
 
     home = {
@@ -46,7 +46,7 @@ home-manager.extraSpecialArgs = {
         ".yocto/site.conf".source = ./yocto/site.conf;
       };
 
-      stateVersion = "23.05";
+      stateVersion = "26.05";
     };
 
     # set the bash configurations
@@ -151,46 +151,54 @@ home-manager.extraSpecialArgs = {
         '';
       };
 
+    programs.delta = {
+      enable = true;
+      enableGitIntegration = true;
+      options.syntax-theme = "base16-256";
+    };
+
     programs.git = {
       enable = true;
 
-      userName = "Rodrigo M. Duarte";
-      userEmail = "rodrigo.duarte@ossystems.com.br";
-
-      delta = {
-        enable = true;
-        options.syntax-theme = "base16-256";
-      };
-
-      extraConfig = {
-        core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
-        core.editor = "nvim";
+      settings = {
+        user = {
+          name = "Rodrigo M. Duarte";
+          email = "rodrigo.duarte@ossystems.com.br";
+        };
+        core = {
+          sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
+          editor = "nvim";
+        };
       };
     };
 
     programs.ssh = {
       enable = true;
-      extraConfig = ''
-        Host code.ossystems.com.br
-            HostName code.ossystems.io
-            User mdrodrigo
+      enableDefaultConfig = false;
 
-        Host code.ossystems.io
-            User mdrodrigo
-            WarnWeakCrypto no
-        
-        Host *.ossystems.com.br
-            HostkeyAlgorithms +ssh-rsa
-            PubkeyAcceptedAlgorithms +ssh-rsa
-
-        Host *.lab.ossystems
-            ForwardAgent yes
-            ForwardX11 yes
-            ForwardX11Trusted yes
-
-        Host git-codecommit.*.amazonaws.com
-            User APKA6GBMEPVHOKCNZQWD
-      '';
+      settings = {
+        "*" = { };
+        "code.ossystems.com.br" = {
+          Hostname = "code.ossystems.io";
+          User = "mdrodrigo";
+        };
+        "code.ossystems.io" = {
+          User = "mdrodrigo";
+          WarnWeakCrypto = "no";
+        };
+        "*.ossystems.com.br" = {
+          HostkeyAlgorithms = "+ssh-rsa";
+          PubkeyAcceptedAlgorithms = "+ssh-rsa";
+        };
+        "*.lab.ossystems" = {
+          ForwardAgent = true;
+          ForwardX11 = true;
+          ForwardX11Trusted = true;
+        };
+        "git-codecommit.*.amazonaws.com" = {
+          User = "APKA6GBMEPVHOKCNZQWD";
+        };
+      };
     };
   };
 }
