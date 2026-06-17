@@ -3,6 +3,12 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-26.05";
+
+    red-tape = {
+      url = "github:phaer/red-tape";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     home-manager = {
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -28,70 +34,41 @@
     };
   };
 
-  outputs = { self, ... }@inputs:
+  outputs = inputs@{ self, red-tape, ... }:
     let
-      inherit (self) outputs;
-      inherit (import ./lib { inherit inputs outputs; }) mkSystem mkInstallerForSystem;
-      systems = [ "x86_64-linux" "aarch64-linux" ];
-      forEachSystem = f: inputs.nixpkgs.lib.genAttrs systems (sys: f pkgsFor.${sys});
-      pkgsFor = inputs.nixpkgs.legacyPackages;
-    in
-    {
-      overlays = import ./overlays { inherit inputs outputs; };
+      mkInstallerForSystem = { hostname, targetConfiguration }:
+        (inputs.nixpkgs.lib.nixosSystem {
+          specialArgs = {
+            flake = self;
+            inherit inputs targetConfiguration;
+            hostName = hostname;
+          };
+          modules = [ ./nix/installer/configuration.nix ];
+        }).config.system.build.isoImage;
 
-      nixosConfigurations = {
-        centrium = mkSystem {
-          hostname = "centrium";
-          system = "x86_64-linux";
-        };
-
-        hyper = mkSystem {
-          hostname = "hyper";
-          system = "x86_64-linux";
-        };
-
-        pikachu = mkSystem {
-          hostname = "pikachu";
-          system = "x86_64-linux";
-        };
-        monster = mkSystem {
-          hostname = "monster";
-          system = "x86_64-linux";
-        };
-
-      };
-
-      packages = builtins.foldl'
+      installerPackages = builtins.foldl'
         (packages: hostname:
           let
-            inherit (self.nixosConfigurations.${hostname}.config.nixpkgs) system;
             targetConfiguration = self.nixosConfigurations.${hostname};
+            inherit (targetConfiguration.config.nixpkgs.hostPlatform) system;
           in
           packages // {
             ${system} = (packages.${system} or { }) // {
-              "${hostname}-install-iso" = mkInstallerForSystem { inherit hostname targetConfiguration system; };
+              "${hostname}-install-iso" = mkInstallerForSystem { inherit hostname targetConfiguration; };
             };
           })
         { }
         (builtins.attrNames self.nixosConfigurations);
+    in
+    red-tape.mkFlake {
+      inherit inputs self;
+      src = ./.;
+      prefix = "nix";
+      systems = [ "x86_64-linux" "aarch64-linux" ];
 
-      formatter = forEachSystem (pkgs: pkgs.writeShellApplication {
-        name = "normalise_nix";
-        runtimeInputs = with pkgs; [ nixpkgs-fmt statix ];
-        text = ''
-          set -o xtrace
-          nixpkgs-fmt "$@"
-          statix fix "$@"
-        '';
-      });
-
-      checks = forEachSystem (pkgs: {
-        lint = pkgs.runCommand "lint-code" { nativeBuildInputs = with pkgs; [ nixpkgs-fmt deadnix statix ]; } ''
-          deadnix --fail ${./.}
-          #statix check ${./.} # https://github.com/nerdypepper/statix/issues/75
-          nixpkgs-fmt --check ${./.}
-          touch $out
-        '';
-      });
+      flake = {
+        overlays = import ./nix/overlays { inherit inputs; outputs = self; };
+        packages = installerPackages;
+      };
     };
 }

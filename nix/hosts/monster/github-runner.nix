@@ -1,9 +1,8 @@
 { config, inputs, pkgs, ... }:
 
 let
-  runners = builtins.genList
-    (x: "${config.roles.github-actions-runner.name}-${toString (x + 1)}")
-    config.roles.github-actions-runner.count;
+  inherit (config.roles.github-actions-runner) name count;
+  runners = builtins.genList (x: "${name}-${toString (x + 1)}") count;
 in
 {
   imports = [
@@ -16,7 +15,7 @@ in
     count = 4;
     name = "monster-runner";
     githubApp = {
-      id = "2203207";
+      id = "4080784";
       login = "OSSystems";
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
@@ -26,12 +25,28 @@ in
       nodejs_24
       file
       coreutils
+      which
+      python3
     ];
     nodeRuntimes = [ "node24" ];
   };
 
+  nix.settings = {
+    allowed-users = runners;
+    trusted-users = runners;
+  };
+
+  systemd.services = builtins.listToAttrs (
+    builtins.map
+      (n: {
+        name = "github-runner-${name}-${toString n}";
+        value.environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
+      })
+      (builtins.genList (x: x + 1) count)
+  );
+
   sops = {
-    defaultSopsFile = ../../secrets/monster.yaml;
+    defaultSopsFile = ../../../secrets/monster.yaml;
     secrets.github-app-runner-private-key = { };
     secrets.ossystems-tools-deploy-key.mode = "0400";
   };
@@ -41,9 +56,4 @@ in
       IdentityFile ${config.sops.secrets.ossystems-tools-deploy-key.path}
       IdentitiesOnly yes
   '';
-
-  nix.settings = {
-    trusted-users = runners;
-    allowed-users = runners;
-  };
 }
