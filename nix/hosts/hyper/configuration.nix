@@ -1,5 +1,8 @@
-{ inputs, pkgs, ... }:
+{ inputs, pkgs, flake, ... }:
 
+let
+  inherit (flake.packages.${pkgs.system}) bitbake_2_8_0 bitbake_2_10_0;
+in
 {
   imports = with inputs.nixos-hardware.nixosModules; [
     common-cpu-intel
@@ -55,12 +58,12 @@
     enable = true;
     versions = {
       "scarthgap" = {
-        package = pkgs.bitbakePackages.bitbake_2_8_0;
+        package = bitbake_2_8_0;
         hashServPort = 8686;
         prServPort = 8685;
       };
       "styhead" = {
-        package = pkgs.bitbakePackages.bitbake_2_10_0;
+        package = bitbake_2_10_0;
         hashServPort = 8786;
         prServPort = 8785;
       };

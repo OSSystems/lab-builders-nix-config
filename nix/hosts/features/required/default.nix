@@ -1,4 +1,4 @@
-{ pkgs, inputs, hostName, ... }:
+{ pkgs, inputs, hostName, flake, ... }:
 
 {
   imports = [
@@ -29,9 +29,9 @@
     ../../../users/rodrigo
   ];
 
-  environment.systemPackages = with pkgs; [
-    host-scripts
-    ossystems-tools
+  environment.systemPackages = [
+    flake.packages.${pkgs.system}.host-scripts
+    flake.packages.${pkgs.system}.ossystems-tools
   ];
 
   networking.hostName = hostName;
