@@ -10,6 +10,7 @@
     ../features/zram-swap.nix
     ./partitioning.nix
     ./github-runner.nix
+    ./ossystems-tools-access.nix
     ../../users/samuel
   ];
 
