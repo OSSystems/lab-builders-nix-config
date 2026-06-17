@@ -12,45 +12,10 @@ on:
       - 'flake.lock'
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
+  ci:
+    runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v6
-    - name: Install Nix
-      uses: nixbuild/nix-quick-install-action@v34
-      with:
-        nix_conf: experimental-features = nix-command flakes repl-flake
-    - uses: cachix/cachix-action@v17
-      with:
-        name: ossystems-lab
-        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-    - name: Install SSH Private Key
-      uses: webfactory/ssh-agent@v0.10.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    - run: nix flake check
-
-  nixos:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        nixosConfiguration:
-          - centrium
-          - hyper
-          - pikachu
-    steps:
-    - run: sudo apt-get clean
-    - uses: actions/checkout@v6
-    - name: Install Nix
-      uses: nixbuild/nix-quick-install-action@v34
-      with:
-        nix_conf: experimental-features = nix-command flakes repl-flake
-    - uses: cachix/cachix-action@v17
-      with:
-        name: ossystems-lab
-        authToken: ${{ secrets.CACHIX_AUTH_TOKEN }}
-    - name: Install SSH Private Key
-      uses: webfactory/ssh-agent@v0.10.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-    - run: nix -Lv build ".#nixosConfigurations.${{ matrix.nixosConfiguration }}.config.system.build.toplevel"
+      - uses: ossystems/nix-actions@v1
+        with:
+          checks: true
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
