@@ -35,40 +35,31 @@
   };
 
   outputs = inputs@{ self, red-tape, ... }:
-    let
-      mkInstallerForSystem = { hostname, targetConfiguration }:
-        (inputs.nixpkgs.lib.nixosSystem {
-          specialArgs = {
-            flake = self;
-            inherit inputs targetConfiguration;
-            hostName = hostname;
-          };
-          modules = [ ./nix/installer/configuration.nix ];
-        }).config.system.build.isoImage;
-
-      installerPackages = builtins.foldl'
-        (packages: hostname:
-          let
-            targetConfiguration = self.nixosConfigurations.${hostname};
-            inherit (targetConfiguration.config.nixpkgs.hostPlatform) system;
-          in
-          packages // {
-            ${system} = (packages.${system} or { }) // {
-              "${hostname}-install-iso" = mkInstallerForSystem { inherit hostname targetConfiguration; };
-            };
-          })
-        { }
-        (builtins.attrNames self.nixosConfigurations);
-    in
     red-tape.mkFlake {
       inherit inputs self;
       src = ./.;
       prefix = "nix";
       systems = [ "x86_64-linux" "aarch64-linux" ];
 
+      perSystem = { system, ... }: {
+        packages = builtins.listToAttrs (
+          builtins.concatMap
+            (hostName:
+              let host = self.nixosConfigurations.${hostName};
+              in
+              if host.config.nixpkgs.hostPlatform.system == system then [{
+                name = "${hostName}-install-iso";
+                value = import ./nix/installer/iso.nix {
+                  inherit inputs hostName;
+                  flake = self;
+                };
+              }] else [ ])
+            (builtins.attrNames self.nixosConfigurations)
+        );
+      };
+
       flake = {
         overlays = import ./nix/overlays { inherit inputs; outputs = self; };
-        packages = installerPackages;
       };
     };
 }
