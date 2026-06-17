@@ -16,6 +16,16 @@
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nixos-hardware.url = "nixos-hardware";
     disko.url = "github:nix-community/disko";
+
+    srvos = {
+      url = "github:nix-community/srvos";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = { self, ... }@inputs:

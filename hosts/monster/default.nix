@@ -9,6 +9,8 @@
     ../features/shared-state-yocto
     ../features/zram-swap.nix
     ./partitioning.nix
+    ./github-runner.nix
+    ../../users/samuel
   ];
 
   boot = {

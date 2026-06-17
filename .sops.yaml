@@ -1,0 +1,10 @@
+keys:
+  - &admin_samuel age1lpn0g0yrz5svwlhk0us6nurw666v2w5ru9qe583pwtdnqhpcn9fqj8zd0q
+  - &monster age1c2xa8fmslcl4k6mc3gcn7kpc7z6x58fqseuy8g2qdgv9r3w3j3qqlmj3l7
+
+creation_rules:
+  - path_regex: ^secrets/.*$
+    key_groups:
+      - age:
+          - *admin_samuel
+          - *monster
