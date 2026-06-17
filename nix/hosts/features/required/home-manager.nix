@@ -1,10 +1,10 @@
-{ inputs, outputs, ... }: {
+{ inputs, flake, ... }: {
   imports = [
     inputs.home-manager.nixosModules.home-manager
   ];
 
   nixpkgs = {
-    overlays = builtins.attrValues outputs.overlays;
+    overlays = builtins.attrValues flake.overlays;
     config = {
       allowUnfree = true;
       allowUnfreePredicate = _: true;

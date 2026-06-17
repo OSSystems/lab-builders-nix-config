@@ -1,7 +1,10 @@
-{ pkgs, ... }:
+{ pkgs, inputs, hostName, ... }:
 
 {
   imports = [
+    inputs.disko.nixosModules.disko
+    ../../../modules/nixos/bitbake.nix
+
     ./auto-upgrade.nix
     ./console.nix
     ./disable-desktop-features.nix
@@ -30,6 +33,8 @@
     host-scripts
     ossystems-tools
   ];
+
+  networking.hostName = hostName;
 
   system.stateVersion = "26.05";
 }
