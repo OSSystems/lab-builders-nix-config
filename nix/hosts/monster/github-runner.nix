@@ -36,6 +36,21 @@ in
     trusted-users = runners;
   };
 
+  systemd.tmpfiles.rules = [ "d /var/lib/github-runner-work 0750 root root -" ];
+
+  systemd.mounts = [
+    {
+      what = "/var/lib/github-runner-work";
+      where = "/run/github-runner";
+      type = "none";
+      options = "bind";
+      requires = [ "systemd-tmpfiles-setup.service" ];
+      after = [ "systemd-tmpfiles-setup.service" ];
+      before = map (r: "github-runner-${r}.service") runners;
+      wantedBy = map (r: "github-runner-${r}.service") runners;
+    }
+  ];
+
   systemd.services = builtins.listToAttrs (
     builtins.map
       (n: {
