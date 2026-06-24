@@ -1,4 +1,9 @@
-{ config, inputs, pkgs, ... }:
+{
+  config,
+  inputs,
+  pkgs,
+  ...
+}:
 
 let
   inherit (config.roles.github-actions-runner) name count;
@@ -38,15 +43,18 @@ in
 
   boot.runSize = "75%";
 
-  swapDevices = [{ device = "/var/lib/swapfile"; size = 16384; }];
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 16384;
+    }
+  ];
 
   systemd.services = builtins.listToAttrs (
-    builtins.map
-      (n: {
-        name = "github-runner-${name}-${toString n}";
-        value.environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
-      })
-      (builtins.genList (x: x + 1) count)
+    builtins.map (n: {
+      name = "github-runner-${name}-${toString n}";
+      value.environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
+    }) (builtins.genList (x: x + 1) count)
   );
 
   sops = {

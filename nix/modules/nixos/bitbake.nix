@@ -1,7 +1,8 @@
-{ lib
-, pkgs
-, config
-, ...
+{
+  lib,
+  pkgs,
+  config,
+  ...
 }:
 
 with lib;
@@ -15,26 +16,35 @@ in
     enable = mkEnableOption "Bitbake service";
 
     versions = mkOption {
-      type = types.attrsOf (types.submodule ({ name, ... }: {
-        options = {
-          package = mkPackageOption pkgs [ "bitbakePackages" name ] { };
+      type = types.attrsOf (
+        types.submodule (
+          { name, ... }: {
+            options = {
+              package = mkPackageOption pkgs [ "bitbakePackages" name ] { };
 
-          hashServPort = mkOption {
-            type = types.int;
-            default = 8686;
-          };
+              hashServPort = mkOption {
+                type = types.int;
+                default = 8686;
+              };
 
-          prServPort = mkOption {
-            type = types.int;
-            default = 8685;
-          };
+              prServPort = mkOption {
+                type = types.int;
+                default = 8685;
+              };
 
-          logLevel = mkOption {
-            type = types.enum [ "error" "warning" "info" "debug" ];
-            default = "info";
-          };
-        };
-      }));
+              logLevel = mkOption {
+                type = types.enum [
+                  "error"
+                  "warning"
+                  "info"
+                  "debug"
+                ];
+                default = "info";
+              };
+            };
+          }
+        )
+      );
       default = { };
     };
   };
@@ -48,12 +58,15 @@ in
       };
     };
 
-    networking.firewall.allowedTCPPorts = mkMerge (mapAttrsToList
-      (_: settings: [ settings.hashServPort settings.prServPort ])
-      cfg.versions);
+    networking.firewall.allowedTCPPorts = mkMerge (
+      mapAttrsToList (_: settings: [
+        settings.hashServPort
+        settings.prServPort
+      ]) cfg.versions
+    );
 
-    systemd.services = mkMerge (mapAttrsToList
-      (name: settings: {
+    systemd.services = mkMerge (
+      mapAttrsToList (name: settings: {
         "bitbake-hashserv-${name}" = {
           description = "Bitbake Hash Server (${name})";
           wantedBy = [ "multi-user.target" ];
@@ -85,7 +98,7 @@ in
             StateDirectoryMode = 750;
           };
         };
-      })
-      cfg.versions);
+      }) cfg.versions
+    );
   };
 }

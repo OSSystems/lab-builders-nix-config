@@ -1,49 +1,63 @@
-{ inputs, pkgs, flake, ... }:
+{
+  inputs,
+  pkgs,
+  flake,
+  ...
+}:
 
 let
   inherit (flake.packages.${pkgs.system}) bitbake_2_8_0 bitbake_2_10_0;
 in
 {
-  imports = with inputs.nixos-hardware.nixosModules; [
-    common-cpu-intel
-    common-pc-ssd
-  ] ++ [
-    ../features/required
-    ../features/zram-swap.nix
-    ./partitioning.nix
-  ];
+  imports =
+    with inputs.nixos-hardware.nixosModules;
+    [
+      common-cpu-intel
+      common-pc-ssd
+    ]
+    ++ [
+      ../features/required
+      ../features/zram-swap.nix
+      ./partitioning.nix
+    ];
 
   boot = {
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
     loader.efi.efiSysMountPoint = "/boot";
 
-    initrd.availableKernelModules = [ "nvme" "xhci_pci" "usbhid" ];
+    initrd.availableKernelModules = [
+      "nvme"
+      "xhci_pci"
+      "usbhid"
+    ];
     initrd.kernelModules = [ ];
 
     kernelModules = [ "kvm-intel" ];
 
-    kernelParams = [ "nfs.nfs4_disable_idmapping=0" "nfsd.nfs4_disable_idmapping=0" ];
+    kernelParams = [
+      "nfs.nfs4_disable_idmapping=0"
+      "nfsd.nfs4_disable_idmapping=0"
+    ];
   };
 
   users.groups.builder = { };
 
   networking.firewall.allowedTCPPorts = [ 2049 ];
 
-  system.activationScripts.srv =
-    ''
-      mkdir -p /srv/nfs/yocto/download-cache
-      mkdir -p /srv/nfs/yocto/sstate-cache
+  system.activationScripts.srv = ''
+    mkdir -p /srv/nfs/yocto/download-cache
+    mkdir -p /srv/nfs/yocto/sstate-cache
 
-      chown nobody:nogroup /srv/nfs/yocto/download-cache
-      chown nobody:nogroup /srv/nfs/yocto/sstate-cache
+    chown nobody:nogroup /srv/nfs/yocto/download-cache
+    chown nobody:nogroup /srv/nfs/yocto/sstate-cache
 
-      chmod -R g+s /srv/nfs/yocto/*
+    chmod -R g+s /srv/nfs/yocto/*
 
-      chown -R root:builder /srv/nfs/yocto/*
-      chmod -R 775 /srv/nfs/yocto/*
-      ${pkgs.acl}/bin/setfacl -m d:u::rwX,d:g::rwX,d:o::rX /srv/nfs/yocto/*
-    '';
+    chown -R root:builder /srv/nfs/yocto/*
+    chmod -R 775 /srv/nfs/yocto/*
+    ${pkgs.acl}/bin/setfacl -m d:u::rwX,d:g::rwX,d:o::rX /srv/nfs/yocto/*
+  '';
 
   services.nfs.server = {
     enable = true;

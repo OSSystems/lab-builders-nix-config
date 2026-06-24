@@ -1,9 +1,10 @@
 { pkgs, ... }:
 
-pkgs.callPackage
-  ({ chickenPackages_4
-   , makeWrapper
-   }:
+pkgs.callPackage (
+  {
+    chickenPackages_4,
+    makeWrapper,
+  }:
 
   let
     comparse = chickenPackages_4.eggDerivation {
@@ -77,7 +78,6 @@ pkgs.callPackage
 
       ];
     };
-
 
     medea = chickenPackages_4.eggDerivation {
       name = "medea";
@@ -201,5 +201,5 @@ pkgs.callPackage
       sxpath
       uri-common
     ];
-  })
-{ }
+  }
+) { }
