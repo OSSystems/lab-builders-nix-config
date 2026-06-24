@@ -1,8 +1,8 @@
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   users.users.luciano = {
-    description = "Luciano Gomes";
+    description = "Luciano Dittgen";
 
     isNormalUser = true;
     extraGroups = [ "docker" "wheel" ];
@@ -19,6 +19,7 @@
     home = {
       packages = with pkgs; [
         bintools
+        inputs.codex-cli-nix.packages.${pkgs.system}.default
         gitRepo
         htop
         kas
@@ -70,8 +71,8 @@
     programs.git = {
       enable = true;
 
-      userName = "Luciano Gomes";
-      userEmail = "luciano@ossystems.com.br";
+      userName = "Luciano Dittgen";
+      userEmail = "luciano.dittgen@ossystems.com.br";
 
       delta = {
         enable = true;
@@ -80,7 +81,7 @@
 
       extraConfig = {
         core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
-        core.editor = "nvim";
+        core.editor = "emacs";
       };
     };
 

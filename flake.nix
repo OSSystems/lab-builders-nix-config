@@ -11,6 +11,7 @@
     vscode-server.url = "github:nix-community/nixos-vscode-server";
     nixos-hardware.url = "nixos-hardware";
     disko.url = "github:nix-community/disko";
+    codex-cli-nix.url = "github:sadjow/codex-cli-nix";
   };
 
   outputs = { self, ... }@inputs:
