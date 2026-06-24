@@ -32,34 +32,52 @@
       url = "github:Mic92/sops-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    attic = {
+      url = "github:zhaofengli/attic";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = inputs@{ self, red-tape, ... }:
+  outputs =
+    inputs@{ self, red-tape, ... }:
     red-tape.mkFlake {
       inherit inputs self;
       src = ./.;
       prefix = "nix";
-      systems = [ "x86_64-linux" "aarch64-linux" ];
+      systems = [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
       perSystem = { system, ... }: {
         packages = builtins.listToAttrs (
-          builtins.concatMap
-            (hostName:
-              let host = self.nixosConfigurations.${hostName};
-              in
-              if host.config.nixpkgs.hostPlatform.system == system then [{
-                name = "${hostName}-install-iso";
-                value = import ./nix/installer/iso.nix {
-                  inherit inputs hostName;
-                  flake = self;
-                };
-              }] else [ ])
-            (builtins.attrNames self.nixosConfigurations)
+          builtins.concatMap (
+            hostName:
+            let
+              host = self.nixosConfigurations.${hostName};
+            in
+            if host.config.nixpkgs.hostPlatform.system == system then
+              [
+                {
+                  name = "${hostName}-install-iso";
+                  value = import ./nix/installer/iso.nix {
+                    inherit inputs hostName;
+                    flake = self;
+                  };
+                }
+              ]
+            else
+              [ ]
+          ) (builtins.attrNames self.nixosConfigurations)
         );
       };
 
       flake = {
-        overlays = import ./nix/overlays { inherit inputs; outputs = self; };
+        overlays = import ./nix/overlays {
+          inherit inputs;
+          outputs = self;
+        };
       };
     };
 }
