@@ -63,12 +63,5 @@ in
   sops = {
     defaultSopsFile = ../../../secrets/monster.yaml;
     secrets.github-app-runner-private-key = { };
-    secrets.ossystems-tools-deploy-key.mode = "0400";
   };
-
-  programs.ssh.extraConfig = ''
-    Match host github.com user root
-      IdentityFile ${config.sops.secrets.ossystems-tools-deploy-key.path}
-      IdentitiesOnly yes
-  '';
 }
