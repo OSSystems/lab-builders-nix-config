@@ -1,10 +1,17 @@
-{ pkgs, inputs, hostName, flake, ... }:
+{
+  pkgs,
+  inputs,
+  hostName,
+  flake,
+  ...
+}:
 
 {
   imports = [
     inputs.disko.nixosModules.disko
     ../../../modules/nixos/bitbake.nix
 
+    ./attic-client.nix
     ./auto-upgrade.nix
     ./console.nix
     ./disable-desktop-features.nix
