@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
-pkgs.callPackage
-  ({ stdenv }:
+pkgs.callPackage (
+  { stdenv }:
   stdenv.mkDerivation {
     name = "host-scripts";
     src = ../../scripts;
@@ -9,5 +9,5 @@ pkgs.callPackage
       mkdir -p $out/bin
       cp -r * $out/bin
     '';
-  })
-{ }
+  }
+) { }

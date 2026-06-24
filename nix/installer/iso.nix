@@ -1,4 +1,8 @@
-{ inputs, flake, hostName }:
+{
+  inputs,
+  flake,
+  hostName,
+}:
 
 let
   inherit (inputs.nixpkgs) lib;
@@ -6,11 +10,17 @@ let
   targetConfiguration = flake.nixosConfigurations.${hostName};
   inherit (targetConfiguration.config.nixpkgs.hostPlatform) system;
 
-  iso = (lib.nixosSystem {
-    specialArgs = {
-      inherit flake inputs targetConfiguration hostName;
-    };
-    modules = [ ./configuration.nix ];
-  }).config.system.build.isoImage;
+  iso =
+    (lib.nixosSystem {
+      specialArgs = {
+        inherit
+          flake
+          inputs
+          targetConfiguration
+          hostName
+          ;
+      };
+      modules = [ ./configuration.nix ];
+    }).config.system.build.isoImage;
 in
 lib.addMetaAttrs { platforms = [ system ]; } iso

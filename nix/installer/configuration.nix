@@ -1,4 +1,10 @@
-{ config, pkgs, modulesPath, targetConfiguration, ... }:
+{
+  config,
+  pkgs,
+  modulesPath,
+  targetConfiguration,
+  ...
+}:
 
 {
   imports = [
@@ -16,8 +22,15 @@
 
   # Disable ZFS support, it may not be compatible
   # with the configured kernel version
-  boot.supportedFilesystems = pkgs.lib.mkForce
-    [ "btrfs" "reiserfs" "vfat" "f2fs" "xfs" "ntfs" "cifs" ];
+  boot.supportedFilesystems = pkgs.lib.mkForce [
+    "btrfs"
+    "reiserfs"
+    "vfat"
+    "f2fs"
+    "xfs"
+    "ntfs"
+    "cifs"
+  ];
 
   disko.enableConfig = false;
   environment.systemPackages = with pkgs; [
