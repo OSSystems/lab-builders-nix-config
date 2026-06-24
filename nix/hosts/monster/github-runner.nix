@@ -36,20 +36,9 @@ in
     trusted-users = runners;
   };
 
-  systemd.tmpfiles.rules = [ "d /var/lib/github-runner-work 0755 root root -" ];
+  boot.runSize = "75%";
 
-  systemd.mounts = [
-    {
-      what = "/var/lib/github-runner-work";
-      where = "/run/github-runner";
-      type = "none";
-      options = "bind";
-      requires = [ "systemd-tmpfiles-setup.service" ];
-      after = [ "systemd-tmpfiles-setup.service" ];
-      before = map (r: "github-runner-${r}.service") runners;
-      wantedBy = [ "multi-user.target" ];
-    }
-  ];
+  swapDevices = [{ device = "/var/lib/swapfile"; size = 16384; }];
 
   systemd.services = builtins.listToAttrs (
     builtins.map
