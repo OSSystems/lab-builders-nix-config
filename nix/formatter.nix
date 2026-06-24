@@ -2,10 +2,13 @@
 
 pkgs.writeShellApplication {
   name = "normalise_nix";
-  runtimeInputs = with pkgs; [ nixpkgs-fmt statix ];
+  runtimeInputs = with pkgs; [
+    nixfmt
+    statix
+  ];
   text = ''
     set -o xtrace
-    nixpkgs-fmt "$@"
+    nixfmt "$@"
     statix fix "$@"
   '';
 }
