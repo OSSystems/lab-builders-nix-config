@@ -39,8 +39,8 @@
   ];
 
   environment.systemPackages = [
-    flake.packages.${pkgs.system}.host-scripts
-    flake.packages.${pkgs.system}.ossystems-tools
+    flake.packages.${pkgs.stdenv.hostPlatform.system}.host-scripts
+    flake.packages.${pkgs.stdenv.hostPlatform.system}.ossystems-tools
   ];
 
   networking.hostName = hostName;

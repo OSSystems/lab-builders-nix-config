@@ -6,7 +6,7 @@
 }:
 
 let
-  atticClient = inputs.attic.packages.${pkgs.system}.attic-client;
+  atticClient = inputs.attic.packages.${pkgs.stdenv.hostPlatform.system}.attic-client;
 
   endpoint = "https://cache.freedom.ind.br";
   cache = "ossystems";

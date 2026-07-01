@@ -6,7 +6,7 @@
 }:
 
 let
-  inherit (flake.packages.${pkgs.system}) bitbake_2_8_0 bitbake_2_10_0;
+  inherit (flake.packages.${pkgs.stdenv.hostPlatform.system}) bitbake_2_8_0 bitbake_2_10_0;
 in
 {
   imports =

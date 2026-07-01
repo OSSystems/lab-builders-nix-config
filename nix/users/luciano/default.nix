@@ -70,35 +70,43 @@
       tmux.enableShellIntegration = true;
     };
 
+    programs.delta = {
+      enable = true;
+      enableGitIntegration = true;
+      options.syntax-theme = "base16-256";
+    };
+
     programs.git = {
       enable = true;
 
-      userName = "Luciano Gomes";
-      userEmail = "luciano@ossystems.com.br";
-
-      delta = {
-        enable = true;
-        options.syntax-theme = "base16-256";
-      };
-
-      extraConfig = {
-        core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
-        core.editor = "nvim";
+      settings = {
+        user = {
+          name = "Luciano Gomes";
+          email = "luciano@ossystems.com.br";
+        };
+        core = {
+          sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
+          editor = "nvim";
+        };
       };
     };
 
     programs.ssh = {
       enable = true;
-      extraConfig = ''
-        Host *.ossystems.com.br
-            HostkeyAlgorithms +ssh-rsa
-            PubkeyAcceptedAlgorithms +ssh-rsa
+      enableDefaultConfig = false;
 
-        Host *.lab.ossystems
-            ForwardAgent yes
-            ForwardX11 yes
-            ForwardX11Trusted yes
-      '';
+      settings = {
+        "*" = { };
+        "*.ossystems.com.br" = {
+          HostkeyAlgorithms = "+ssh-rsa";
+          PubkeyAcceptedAlgorithms = "+ssh-rsa";
+        };
+        "*.lab.ossystems" = {
+          ForwardAgent = true;
+          ForwardX11 = true;
+          ForwardX11Trusted = true;
+        };
+      };
     };
   };
 }
