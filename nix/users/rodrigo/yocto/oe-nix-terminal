@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+# OE_TERMINAL helper for interactive BitBake tasks (menuconfig, devshell) when
+# the build runs inside the bwrap/nix FHS sandbox.
+#
+# Deployed by home-manager to ~/.yocto/oe-nix-terminal and referenced from
+# ~/.yocto/site.conf via OE_TERMINAL_CUSTOMCMD.
+#
+# Why this exists
+# ---------------
+# The interactive tmux backends (tmux-new-window / tmux-running) attach to the
+# tmux server that owns your login session. That server runs OUTSIDE the bwrap
+# sandbox, so any window it forks lacks the sandbox mount namespace and build
+# environment; run.do_terminal then dies in ~0.01s ("Terminal started but
+# stopped after only 0.01s").
+#
+# nsenter cannot rescue it: the sandbox is an unprivileged user namespace with
+# no_new_privs set and no usable sudo, so joining it from the outside window
+# needs root we do not have.
+#
+# The unprivileged way to get a terminal *inside* the sandbox is to spawn a
+# tmux server that is a child of THIS process (which BitBake runs inside the
+# sandbox). Its windows then inherit the sandbox namespace and environment.
+# You attach to that dedicated server in one step (printed below).
+#
+# BitBake invokes us as:  oe-nix-terminal <sh_cmd...>
+# where <sh_cmd...> is the phonehome wrapper + the run.do_terminal script.
+set -eu
+
+# Dedicated, predictable socket + session so attaching is always the same.
+SOCK="oe-devshell"
+SESSION="oe"
+TITLE="devshell"
+
+# Reuse the session if it already exists (concurrent menuconfig/devshell stack
+# as extra windows); otherwise create it detached. Detached so this launcher
+# returns immediately and BitBake can read the phonehome pidfile.
+if tmux -L "$SOCK" has-session -t "$SESSION" 2>/dev/null; then
+    tmux -L "$SOCK" new-window  -t "$SESSION" -n "$TITLE" "$@"
+else
+    tmux -L "$SOCK" new-session -d -s "$SESSION" -n "$TITLE" "$@"
+fi
+
+echo "oe-nix-terminal: interactive task started inside the sandbox."
+echo "Attach with:  tmux -L $SOCK attach -t $SESSION"

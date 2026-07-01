@@ -46,6 +46,10 @@
       ];
       file = {
         ".yocto/site.conf".source = ./yocto/site.conf;
+        ".yocto/oe-nix-terminal" = {
+          source = ./yocto/oe-nix-terminal;
+          executable = true;
+        };
       };
 
       stateVersion = "26.05";
