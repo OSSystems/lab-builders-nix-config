@@ -1,45 +1,48 @@
 #!/bin/sh
 #
-# OE_TERMINAL helper for interactive BitBake tasks (menuconfig, devshell) when
-# the build runs inside the bwrap/nix FHS sandbox.
-#
-# Deployed by home-manager to ~/.yocto/oe-nix-terminal and referenced from
-# ~/.yocto/site.conf via OE_TERMINAL_CUSTOMCMD.
+# OE custom terminal wrapper for the NixOS + bubblewrap (yocto-env) build.
 #
 # Why this exists
 # ---------------
-# The interactive tmux backends (tmux-new-window / tmux-running) attach to the
-# tmux server that owns your login session. That server runs OUTSIDE the bwrap
-# sandbox, so any window it forks lacks the sandbox mount namespace and build
-# environment; run.do_terminal then dies in ~0.01s ("Terminal started but
-# stopped after only 0.01s").
+# BitBake's interactive tasks (do_menuconfig, do_devshell, do_diffconfig, ...)
+# open a terminal by running the auto-generated run.do_terminal script through
+# OE_TERMINAL. That script begins with "#!/bin/bash".
 #
-# nsenter cannot rescue it: the sandbox is an unprivileged user namespace with
-# no_new_privs set and no usable sudo, so joining it from the outside window
-# needs root we do not have.
+# Our build runs inside a bubblewrap container provided by the O.S. Systems
+# "yocto-env" Nix package; inside it /bin/bash exists. The tmux *server*,
+# however, lives on the bare NixOS host (outside the container), where there is
+# no /bin/bash. So the default tmux terminals (tmux / tmux-running /
+# tmux-new-window) spawn the script on the host and it dies immediately with:
 #
-# The unprivileged way to get a terminal *inside* the sandbox is to spawn a
-# tmux server that is a child of THIS process (which BitBake runs inside the
-# sandbox). Its windows then inherit the sandbox namespace and environment.
-# You attach to that dedicated server in one step (printed below).
+#     run.do_terminal: /bin/bash: bad interpreter: No such file or directory
 #
-# BitBake invokes us as:  oe-nix-terminal <sh_cmd...>
-# where <sh_cmd...> is the phonehome wrapper + the run.do_terminal script.
-set -eu
+# (do_menuconfig then "Succeeds" instantly without ever showing the UI.)
+#
+# Fix
+# ---
+# Run the task on a SEPARATE tmux server (socket "oe-build") started from inside
+# the container, so its windows inherit the container's /bin/bash. If we are
+# already inside the user's tmux, surface it as a new window that attaches to
+# that server; otherwise print how to attach.
+#
+# Wired up via build/conf/local.conf:
+#     OE_TERMINAL = "custom"
+#     OE_TERMINAL_CUSTOMCMD = ".../oe-nix-terminal {command}"
 
-# Dedicated, predictable socket + session so attaching is always the same.
-SOCK="oe-devshell"
-SESSION="oe"
-TITLE="devshell"
+SOCK="oe-build"
+SESSION="bb-$$"
 
-# Reuse the session if it already exists (concurrent menuconfig/devshell stack
-# as extra windows); otherwise create it detached. Detached so this launcher
-# returns immediately and BitBake can read the phonehome pidfile.
-if tmux -L "$SOCK" has-session -t "$SESSION" 2>/dev/null; then
-    tmux -L "$SOCK" new-window  -t "$SESSION" -n "$TITLE" "$@"
+# {command} expands to: oe-gnome-terminal-phonehome <pidfile> <run.do_terminal>
+# Start it detached on the container-side tmux server. phonehome records the
+# real task PID into <pidfile>, which BitBake then monitors to know when the
+# interactive task finishes -- so do_menuconfig blocks until you close the menu.
+tmux -L "$SOCK" new-session -d -s "$SESSION" -x 220 -y 55 "$@" || exit $?
+
+if [ -n "$TMUX" ]; then
+    # Inside the user's tmux: pop open a window attached to the task session.
+    tmux new-window -n "$SESSION" "exec tmux -L $SOCK attach -t $SESSION" || true
 else
-    tmux -L "$SOCK" new-session -d -s "$SESSION" -n "$TITLE" "$@"
+    echo "BitBake terminal started. Attach with:  tmux -L $SOCK attach -t $SESSION"
 fi
 
-echo "oe-nix-terminal: interactive task started inside the sandbox."
-echo "Attach with:  tmux -L $SOCK attach -t $SESSION"
+exit 0
