@@ -1,8 +1,12 @@
 { pkgs, ... }:
 
+let
+  codex-cli-nix = builtins.getFlake "github:sadjow/codex-cli-nix/e02cb196c37be4e7e960b8fb3d3fe00131f1b49d";
+in
+
 {
   users.users.luciano = {
-    description = "Luciano Gomes";
+    description = "Luciano Dittgen";
 
     isNormalUser = true;
     extraGroups = [
@@ -16,26 +20,38 @@
 
     # Default - used for bootstrapping.
     password = "pw";
+    shell = pkgs.zsh;
   };
+
+  programs.zsh.enable = true;
 
   home-manager.users.luciano = {
     home = {
       packages = with pkgs; [
         bintools
+        fd
         gitRepo
         htop
+        jq
         kas
+        nerd-fonts.meslo-lg
         nmap
         oelint-adv
         openfortivpn
+        ripgrep
         tmux
         tmuxp
         tree
         unzip
         wget
+        codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
       file = {
         ".yocto/site.conf".source = ./yocto/site.conf;
+        ".yocto/oe-nix-terminal" = {
+          source = ../rodrigo/yocto/oe-nix-terminal;
+          executable = true;
+        };
       };
 
       stateVersion = "23.05";
@@ -63,6 +79,22 @@
       enable = true;
     };
 
+    programs.zsh = {
+      enable = true;
+      autosuggestion.enable = true;
+      syntaxHighlighting.enable = true;
+      plugins = [
+        {
+          name = "powerlevel10k";
+          src = pkgs.zsh-powerlevel10k;
+          file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+        }
+      ];
+      initContent = ''
+        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+      '';
+    };
+
     programs.fzf = {
       enable = true;
       enableBashIntegration = true;
@@ -81,12 +113,12 @@
 
       settings = {
         user = {
-          name = "Luciano Gomes";
-          email = "luciano@ossystems.com.br";
+          name = "Luciano Dittgen";
+          email = "luciano.dittgen@ossystems.com.br";
         };
         core = {
           sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
-          editor = "nvim";
+          editor = "emacs";
         };
       };
     };
