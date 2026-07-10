@@ -1,8 +1,4 @@
-{ pkgs, ... }:
-
-let
-  codex-cli-nix = builtins.getFlake "github:sadjow/codex-cli-nix/e02cb196c37be4e7e960b8fb3d3fe00131f1b49d";
-in
+{ pkgs, inputs, ... }:
 
 {
   users.users.luciano = {
@@ -25,7 +21,15 @@ in
 
   programs.zsh.enable = true;
 
+  home-manager.extraSpecialArgs = {
+    inherit inputs;
+  };
+
   home-manager.users.luciano = {
+    imports = [
+      ../rodrigo/features/claude-code
+    ];
+
     home = {
       packages = with pkgs; [
         bintools
@@ -44,7 +48,6 @@ in
         tree
         unzip
         wget
-        codex-cli-nix.packages.${pkgs.stdenv.hostPlatform.system}.default
       ];
       file = {
         ".yocto/site.conf".source = ./yocto/site.conf;
