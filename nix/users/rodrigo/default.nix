@@ -182,6 +182,16 @@
       enable = true;
       enableDefaultConfig = false;
 
+      # Rendered as a global directive at the very top of ~/.ssh/config (before any
+      # Host block), so it is in effect when every later block is parsed. This lets
+      # the older OpenSSH inside the yocto-env (bwrap/Nix) build container ignore the
+      # keywords below that it doesn't recognise, instead of aborting with "Bad
+      # configuration option" -- which otherwise breaks git-over-ssh fetches such as
+      # `bitbake <recipe> -c fetch`. The modern host ssh still applies both options.
+      extraOptionOverrides = {
+        IgnoreUnknown = "PubkeyAcceptedAlgorithms,WarnWeakCrypto";
+      };
+
       settings = {
         "*" = { };
         "code.ossystems.com.br" = {
