@@ -16,6 +16,10 @@
     mkdir -p /srv/yocto/sstate-cache
   '';
 
+  # Pin NFSv4.1 on both shares. NFSv4.2's READ_PLUS corrupts large-file reads,
+  # so multi-GB BitBake git pack mirrors come back mangled and do_unpack /
+  # devtool modify fail with zlib "inflate: data stream error". The hyper server
+  # also disables 4.2, but pinning here keeps clients on 4.1 regardless.
   fileSystems."/srv/yocto/sstate-cache" = {
     device = "10.5.3.187:/srv/nfs/yocto/sstate-cache";
     fsType = "nfs";
@@ -23,6 +27,7 @@
       "auto"
       "rw"
       "defaults"
+      "nfsvers=4.1"
       "_netdev"
       "x-systemd.automount"
     ];
@@ -35,6 +40,7 @@
       "auto"
       "rw"
       "defaults"
+      "nfsvers=4.1"
       "_netdev"
       "x-systemd.automount"
     ];

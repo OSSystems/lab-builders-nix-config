@@ -68,6 +68,15 @@ in
     '';
   };
 
+  # Cap the server at NFSv4.1. NFSv4.2's READ_PLUS (sparse-aware reads) corrupts
+  # large multi-GB files read back over this share: BitBake's git pack mirrors
+  # (linux/u-boot, >4GB) come back with mangled bytes, so do_unpack / devtool
+  # modify fail with zlib "inflate: data stream error / pack checksum mismatch"
+  # at varying offsets, while a clone of the same repo to local disk is
+  # bit-perfect. Disabling 4.2 makes clients negotiate down to 4.1 (no
+  # READ_PLUS), which the shared Yocto cache doesn't otherwise need.
+  services.nfs.settings.nfsd."vers4.2" = false;
+
   services.bitbake = {
     enable = true;
     versions = {
