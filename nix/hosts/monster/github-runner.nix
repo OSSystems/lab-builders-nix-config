@@ -36,10 +36,7 @@ in
     nodeRuntimes = [ "node24" ];
   };
 
-  nix.settings = {
-    allowed-users = runners;
-    trusted-users = runners;
-  };
+  nix.settings.trusted-users = runners;
 
   boot.runSize = "75%";
 
