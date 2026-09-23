@@ -11,18 +11,17 @@ let
   '';
 in
 {
-  home.packages = with pkgs; [ jq ];
-
-  # Place the wrapper at ~/.local/bin/claude so it takes precedence over
-  # the Nix profile entry, preventing agent-teams-installed binaries from
-  # shadowing the Nix-managed wrapper.
-  home.file.".local/bin/claude".source = "${claudeWrapped}/bin/claude";
-
+  home = {
+    packages = with pkgs; [ jq ];
+    # Place the wrapper at ~/.local/bin/claude so it takes precedence over
+    # the Nix profile entry, preventing agent-teams-installed binaries from
+    # shadowing the Nix-managed wrapper.
+    file.".local/bin/claude".source = "${claudeWrapped}/bin/claude";
+  };
   nixpkgs = {
     overlays = [ inputs.claude-code-overlay.overlays.default ];
     config.allowUnfreePredicate = pkg: builtins.elem (inputs.nixpkgs.lib.getName pkg) [ "claude" ];
   };
-
   programs.claude-code = {
     enable = true;
     package = claudeWrapped;

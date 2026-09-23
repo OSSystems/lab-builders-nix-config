@@ -15,9 +15,9 @@ let
       specialArgs = {
         inherit
           flake
+          hostName
           inputs
           targetConfiguration
-          hostName
           ;
       };
       modules = [ ./configuration.nix ];

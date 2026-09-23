@@ -1,13 +1,12 @@
 {
-  config,
   inputs,
+  config,
   lib,
   ...
 }:
 
 {
   imports = [ inputs.sops-nix.nixosModules.default ];
-
   services.openssh = {
     enable = true;
     settings = {
@@ -27,21 +26,21 @@
       }
     ];
   };
-
-  programs.ssh.knownHosts."github.com".publicKey =
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
-
+  programs = {
+    ssh = {
+      knownHosts."github.com".publicKey =
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
+      extraConfig = ''
+        Match host github.com user root
+          IdentityFile ${config.sops.secrets.ossystems-tools-deploy-key.path}
+          IdentitiesOnly yes
+      '';
+    };
+  };
   sops.secrets.ossystems-tools-deploy-key = {
     sopsFile = ../../../../secrets/common.yaml;
     mode = "0400";
   };
-
-  programs.ssh.extraConfig = ''
-    Match host github.com user root
-      IdentityFile ${config.sops.secrets.ossystems-tools-deploy-key.path}
-      IdentitiesOnly yes
-  '';
-
   # Passwordless sudo when SSH'ing with keys
   security.pam.sshAgentAuth.enable = true;
 }

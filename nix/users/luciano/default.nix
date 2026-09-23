@@ -1,4 +1,4 @@
-{ pkgs, inputs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   users.users.luciano = {
@@ -18,128 +18,121 @@
     password = "pw";
     shell = pkgs.zsh;
   };
-
   programs.zsh.enable = true;
-
-  home-manager.extraSpecialArgs = {
-    inherit inputs;
-  };
-
-  home-manager.users.luciano = {
-    imports = [
-      ../rodrigo/features/claude-code
-    ];
-
-    home = {
-      packages = with pkgs; [
-        bintools
-        fd
-        gitRepo
-        htop
-        jq
-        kas
-        nerd-fonts.meslo-lg
-        nmap
-        oelint-adv
-        openfortivpn
-        ripgrep
-        tmux
-        tmuxp
-        tree
-        unzip
-        wget
+  home-manager = {
+    extraSpecialArgs = {
+      inherit inputs;
+    };
+    users.luciano = {
+      imports = [
+        ../rodrigo/features/claude-code
       ];
-      file = {
-        ".yocto/site.conf".source = ./yocto/site.conf;
-        ".yocto/oe-nix-terminal" = {
-          source = ../rodrigo/yocto/oe-nix-terminal;
-          executable = true;
+      home = {
+        packages = with pkgs; [
+          bintools
+          fd
+          gitRepo
+          htop
+          jq
+          kas
+          nerd-fonts.meslo-lg
+          nmap
+          oelint-adv
+          openfortivpn
+          ripgrep
+          tmux
+          tmuxp
+          tree
+          unzip
+          wget
+        ];
+        file = {
+          ".yocto/site.conf".source = ./yocto/site.conf;
+          ".yocto/oe-nix-terminal" = {
+            source = ../rodrigo/yocto/oe-nix-terminal;
+            executable = true;
+          };
         };
+
+        stateVersion = "23.05";
       };
-
-      stateVersion = "23.05";
-    };
-
-    # set the bash configurations
-    programs.bash = {
-      enable = true;
-      bashrcExtra = ''
-        parse_git_branch() {
-            git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
-        }
-        export PS1="\[\033[01;32m\]\u@\[\033[00m\]\[\033[01;35m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\e[91m\]\$(parse_git_branch)\[\e[00m\]$ "
-      '';
-      shellAliases = {
-        # Insecure SSH and SCP aliases. I use this to connect to temporary devices
-        # such as embedded devices under test or development so we don't need to
-        # delete the fingerprint every time we reinstall them.
-        issh = "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null";
-        iscp = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null";
-      };
-    };
-
-    programs.emacs = {
-      enable = true;
-    };
-
-    programs.zsh = {
-      enable = true;
-      autosuggestion.enable = true;
-      syntaxHighlighting.enable = true;
-      plugins = [
-        {
-          name = "powerlevel10k";
-          src = pkgs.zsh-powerlevel10k;
-          file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-        }
-      ];
-      initContent = ''
-        [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-      '';
-    };
-
-    programs.fzf = {
-      enable = true;
-      enableBashIntegration = true;
-
-      tmux.enableShellIntegration = true;
-    };
-
-    programs.delta = {
-      enable = true;
-      enableGitIntegration = true;
-      options.syntax-theme = "base16-256";
-    };
-
-    programs.git = {
-      enable = true;
-
-      settings = {
-        user = {
-          name = "Luciano Dittgen";
-          email = "luciano.dittgen@ossystems.com.br";
+      programs = {
+        # set the bash configurations
+        bash = {
+          enable = true;
+          bashrcExtra = ''
+            parse_git_branch() {
+                git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+            }
+            export PS1="\[\033[01;32m\]\u@\[\033[00m\]\[\033[01;35m\]\h\[\033[00m\]:\[\033[01;34m\]\w\[\e[91m\]\$(parse_git_branch)\[\e[00m\]$ "
+          '';
+          shellAliases = {
+            # Insecure SSH and SCP aliases. I use this to connect to temporary devices
+            # such as embedded devices under test or development so we don't need to
+            # delete the fingerprint every time we reinstall them.
+            issh = "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null";
+            iscp = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null";
+          };
         };
-        core = {
-          sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
-          editor = "emacs";
+        emacs = {
+          enable = true;
         };
-      };
-    };
-
-    programs.ssh = {
-      enable = true;
-      enableDefaultConfig = false;
-
-      settings = {
-        "*" = { };
-        "*.ossystems.com.br" = {
-          HostkeyAlgorithms = "+ssh-rsa";
-          PubkeyAcceptedAlgorithms = "+ssh-rsa";
+        zsh = {
+          enable = true;
+          autosuggestion.enable = true;
+          syntaxHighlighting.enable = true;
+          plugins = [
+            {
+              name = "powerlevel10k";
+              src = pkgs.zsh-powerlevel10k;
+              file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+            }
+          ];
+          initContent = ''
+            [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+          '';
         };
-        "*.lab.ossystems" = {
-          ForwardAgent = true;
-          ForwardX11 = true;
-          ForwardX11Trusted = true;
+        fzf = {
+          enable = true;
+          enableBashIntegration = true;
+
+          tmux.enableShellIntegration = true;
+        };
+        delta = {
+          enable = true;
+          enableGitIntegration = true;
+          options.syntax-theme = "base16-256";
+        };
+        git = {
+          enable = true;
+
+          settings = {
+            user = {
+              name = "Luciano Dittgen";
+              email = "luciano.dittgen@ossystems.com.br";
+            };
+            core = {
+              sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
+              editor = "emacs";
+            };
+          };
+        };
+        ssh = {
+          enable = true;
+          enableDefaultConfig = false;
+
+          settings = {
+            "*" = { };
+            "*.ossystems.com.br" = {
+              HostkeyAlgorithms = "+ssh-rsa";
+              PubkeyAcceptedAlgorithms = "+ssh-rsa";
+            };
+            "*.lab.ossystems" = {
+              ForwardAgent = true;
+              ForwardX11 = true;
+              ForwardX11Trusted = true;
+            };
+          };
         };
       };
     };

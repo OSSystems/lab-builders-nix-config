@@ -1,6 +1,6 @@
 {
-  config,
   inputs,
+  config,
   pkgs,
   ...
 }:
@@ -14,19 +14,20 @@ let
 in
 {
   imports = [ inputs.sops-nix.nixosModules.default ];
-
-  nix.settings.post-build-hook = pkgs.writeShellScript "attic-push" ''
-    set -eu -f
-    export IFS=' '
-    export HOME=${pushHome}
-    ${atticClient}/bin/attic push ${cache} $OUT_PATHS || true
-  '';
-
-  nix.settings.extra-substituters = [ "${endpoint}/${cache}" ];
-  nix.settings.extra-trusted-public-keys = [
-    "ossystems:RHt7+L/R1IMrs4NvgUISD49ieL0OvyXZHYdDzRUSHps="
-  ];
-
+  nix = {
+    settings = {
+      post-build-hook = pkgs.writeShellScript "attic-push" ''
+        set -eu -f
+        export IFS=' '
+        export HOME=${pushHome}
+        ${atticClient}/bin/attic push ${cache} $OUT_PATHS || true
+      '';
+      extra-substituters = [ "${endpoint}/${cache}" ];
+      extra-trusted-public-keys = [
+        "ossystems:RHt7+L/R1IMrs4NvgUISD49ieL0OvyXZHYdDzRUSHps="
+      ];
+    };
+  };
   systemd.services.attic-push-login = {
     wantedBy = [ "multi-user.target" ];
     path = [ atticClient ];
@@ -40,6 +41,5 @@ in
       attic login local ${endpoint} "$(cat ${config.sops.secrets.attic-push-token.path})"
     '';
   };
-
   sops.secrets.attic-push-token.sopsFile = ../../../../secrets/common.yaml;
 }
