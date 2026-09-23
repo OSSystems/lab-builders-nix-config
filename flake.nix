@@ -23,6 +23,11 @@
     nixos-hardware.url = "nixos-hardware";
     disko.url = "github:nix-community/disko";
 
+    nixpkgs-github-runners = {
+      url = "github:NixOS/nixpkgs/e6ed17b9184373cd145b1ede0872daeef2b5a253";
+      flake = false;
+    };
+
     srvos = {
       url = "github:nix-community/srvos";
       inputs.nixpkgs.follows = "nixpkgs";
