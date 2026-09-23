@@ -1,10 +1,10 @@
 {
   lib,
+  fetchFromGitHub,
+  hash,
   nix-update-script,
   python3,
-  fetchFromGitHub,
   version,
-  hash,
 }:
 
 python3.pkgs.buildPythonApplication {

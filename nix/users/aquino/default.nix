@@ -33,43 +33,40 @@
 
       stateVersion = "26.05";
     };
+    programs = {
+      bash.enable = true;
+      fzf = {
+        enable = true;
+        enableBashIntegration = true;
 
-    programs.bash.enable = true;
-
-    programs.fzf = {
-      enable = true;
-      enableBashIntegration = true;
-
-      tmux.enableShellIntegration = true;
-    };
-
-    programs.delta = {
-      enable = true;
-      enableGitIntegration = true;
-      options.syntax-theme = "base16-256";
-    };
-
-    programs.git = {
-      enable = true;
-
-      settings = {
-        core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
+        tmux.enableShellIntegration = true;
       };
-    };
+      delta = {
+        enable = true;
+        enableGitIntegration = true;
+        options.syntax-theme = "base16-256";
+      };
+      git = {
+        enable = true;
 
-    programs.ssh = {
-      enable = true;
-      enableDefaultConfig = false;
-
-      settings = {
-        "*" = { };
-        "code.ossystems.com.br" = {
-          Hostname = "code.ossystems.io";
+        settings = {
+          core.sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
         };
-        "*.lab.ossystems" = {
-          ForwardAgent = true;
-          ForwardX11 = true;
-          ForwardX11Trusted = true;
+      };
+      ssh = {
+        enable = true;
+        enableDefaultConfig = false;
+
+        settings = {
+          "*" = { };
+          "code.ossystems.com.br" = {
+            Hostname = "code.ossystems.io";
+          };
+          "*.lab.ossystems" = {
+            ForwardAgent = true;
+            ForwardX11 = true;
+            ForwardX11Trusted = true;
+          };
         };
       };
     };

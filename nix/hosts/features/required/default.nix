@@ -1,8 +1,8 @@
 {
-  pkgs,
   inputs,
-  hostName,
+  pkgs,
   flake,
+  hostName,
   ...
 }:
 

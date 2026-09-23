@@ -6,11 +6,10 @@ _:
     "net.core.default_qdisc" = "fq";
     "net.ipv4.tcp_congestion_control" = "bbr";
   };
-
-  # Make sure firewall is enabled
-  networking.firewall.enable = true;
-
-  networking.domain = "lab.ossystems";
-
-  networking.networkmanager.enable = true;
+  networking = {
+    # Make sure firewall is enabled
+    firewall.enable = true;
+    domain = "lab.ossystems";
+    networkmanager.enable = true;
+  };
 }

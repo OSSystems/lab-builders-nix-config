@@ -76,7 +76,7 @@
                 {
                   name = "${hostName}-install-iso";
                   value = import ./nix/installer/iso.nix {
-                    inherit inputs hostName;
+                    inherit hostName inputs;
                     flake = self;
                   };
                 }
