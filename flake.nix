@@ -2,6 +2,15 @@
   description = "Otavio Salvador's NixOS/Home Manager config";
 
   inputs = {
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    pedantix = {
+      url = "github:Swarsel/pedantix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     nixpkgs.url = "nixpkgs/nixos-26.05";
 
     red-tape = {
