@@ -4,7 +4,7 @@
   imports =
     with inputs.nixos-hardware.nixosModules;
     [
-      common-cpu-intel
+      common-cpu-amd
       common-pc-ssd
     ]
     ++ [
@@ -28,6 +28,6 @@
       ];
       kernelModules = [ ];
     };
-    kernelModules = [ "kvm-intel" ];
+    kernelModules = [ "kvm-amd" ];
   };
 }
