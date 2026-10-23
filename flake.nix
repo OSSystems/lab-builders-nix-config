@@ -1,5 +1,5 @@
 {
-  description = "Otavio Salvador's NixOS/Home Manager config";
+  description = "O.S. Systems Lab Builders";
 
   inputs = {
     treefmt-nix = {
