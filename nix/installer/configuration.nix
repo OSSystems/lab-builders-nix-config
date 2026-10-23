@@ -24,6 +24,7 @@
   # with the configured kernel version
   boot.supportedFilesystems = pkgs.lib.mkForce [
     "btrfs"
+    "ext4"
     "reiserfs"
     "vfat"
     "f2fs"
