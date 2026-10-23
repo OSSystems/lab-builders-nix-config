@@ -42,19 +42,29 @@ in
     nodeRuntimes = [ "node24" ];
     extraLabels = [ "nix" ];
     extraPackages = with pkgs; [
+      bats
       cachix
       config.nix.package
       coreutils
+      curl
+      diffutils
       file
+      gawk
       gh
       glibc.bin
+      inetutils
       jq
       nix-eval-jobs
       nodejs_24
       openssh
       openssl
+      procps
       python3
+      shellcheck
+      unzip
+      util-linux
       which
+      xz
     ];
     serviceOverrides = {
       DeviceAllow = [ "/dev/kvm" ];
