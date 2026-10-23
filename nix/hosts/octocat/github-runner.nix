@@ -7,7 +7,7 @@
 
 let
   count = 4;
-  prefix = "monster-runner";
+  prefix = "octocat-runner";
 
   githubRunnerModules = "${inputs.nixpkgs-github-runners}/nixos/modules/services/continuous-integration/github-runner";
 
@@ -85,7 +85,7 @@ in
   );
 
   sops = {
-    defaultSopsFile = ../../../secrets/monster.yaml;
+    defaultSopsFile = ../../../secrets/octocat.yaml;
     secrets.github-app-runner-private-key = { };
   };
 }
