@@ -64,7 +64,16 @@
         "aarch64-linux"
       ];
 
-      perSystem = { system, ... }: {
+      perSystem = { pkgs, system, ... }: {
+        devShells.default = pkgs.mkShell {
+          packages = with pkgs; [
+            sops
+            age
+            ssh-to-age
+            gnupg
+          ];
+        };
+
         packages = builtins.listToAttrs (
           builtins.concatMap (
             hostName:
