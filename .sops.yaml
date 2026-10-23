@@ -1,16 +1,19 @@
 keys:
   - &admin_samuel age1lpn0g0yrz5svwlhk0us6nurw666v2w5ru9qe583pwtdnqhpcn9fqj8zd0q
-  - &monster age1c2xa8fmslcl4k6mc3gcn7kpc7z6x58fqseuy8g2qdgv9r3w3j3qqlmj3l7
+  - &admin_otavio B7F7F218A0541D2A0BEDBE8BEB70FEF3CDFC6E4F
   - &hyper age13zfzhzhf75k7fjvs568yd52qegk6ezer3d9ra9r4js4dae69x9jq07nnut
   - &pikachu age1f97uwcswnz8z3vn3jngejk8a6r3075pajmp7ze8rccvpkkhrhcmsny2nlp
   - &centrium age17278qs9exjzhjvu4fddppdnvwht34r3ffekzse02uc4hjfat6dps7ep73l
+  - &octocat age19kpamw6atqtfqfmq974kfvw097vyk2rznspahzuu6z72888epdcs4yz3nz
 
 creation_rules:
   - path_regex: ^secrets/.*$
     key_groups:
-      - age:
+      - pgp:
+          - *admin_otavio
+        age:
           - *admin_samuel
-          - *monster
           - *hyper
           - *pikachu
           - *centrium
+          - *octocat
