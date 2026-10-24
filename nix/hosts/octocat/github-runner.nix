@@ -37,7 +37,10 @@ in
       id = 4080784;
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
-    nodeRuntimes = [ "node24" ];
+    nodeRuntimes = [
+      "node20"
+      "node24"
+    ];
     extraLabels = [ "nix" ];
     extraPackages = with pkgs; [
       bats
@@ -76,6 +79,16 @@ in
       PrivateDevices = false;
     };
   };
+
+  # The runner evaluates hashFiles() with its node20 external, which is past
+  # end of life.
+  nixpkgs.config.allowInsecurePredicate =
+    pkg:
+    lib.elem (lib.getName pkg) [
+      "nodejs"
+      "nodejs-slim"
+    ]
+    && lib.versions.major (lib.getVersion pkg) == "20";
 
   programs.nix-ld = {
     enable = true;
