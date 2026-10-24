@@ -13,6 +13,7 @@
       ../features/zram-swap.nix
       ./partitioning.nix
       ./github-runner.nix
+      ./microvm-runners.nix
     ];
 
   boot = {
