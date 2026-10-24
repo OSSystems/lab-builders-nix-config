@@ -18,7 +18,7 @@ let
 
   runnersOf = org: builtins.genList (x: "${prefix}-${org}-${toString (x + 1)}") organizations.${org};
   runners = lib.concatMap runnersOf (builtins.attrNames organizations);
-  dockerRunners = runnersOf "shellhub-io";
+  shellhubRunners = runnersOf "shellhub-io";
 in
 {
   imports = [
@@ -127,17 +127,23 @@ in
   systemd.services = builtins.listToAttrs (
     builtins.map (runner: {
       name = "github-runner-${runner}";
-      value = {
-        serviceConfig = {
-          User = runner;
+      value = lib.mkMerge [
+        {
+          serviceConfig.User = runner;
+          environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
         }
-        # The docker group must stay mapped for the socket to be reachable.
-        // lib.optionalAttrs (lib.elem runner dockerRunners) {
-          SupplementaryGroups = [ "docker" ];
-          PrivateUsers = false;
-        };
-        environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
-      };
+        (lib.mkIf (lib.elem runner shellhubRunners) {
+          # The docker group must stay mapped for the socket to be reachable.
+          serviceConfig = {
+            SupplementaryGroups = [ "docker" ];
+            PrivateUsers = false;
+          };
+          path = with pkgs; [
+            wineWowPackages.stable
+            yarn
+          ];
+        })
+      ];
     }) runners
   );
 
