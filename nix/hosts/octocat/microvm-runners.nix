@@ -24,6 +24,10 @@
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
     network.externalInterface = "enp6s0";
+    # VMs hold only the memory their job uses, so they may be given 30% more
+    # than octocat has; zram absorbs the rare moment all of them peak.
+    memOvercommit = 0.3;
+    poolSize = 16;
     guestModules = [
       ./job-environment.nix
       (
