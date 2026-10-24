@@ -26,9 +26,7 @@ in
     "${githubRunnerModules}/options.nix"
     "${githubRunnerModules}/service.nix"
   ];
-
   disabledModules = [ "services/continuous-integration/github-runners.nix" ];
-
   services.github-runners.${prefix} = {
     enable = true;
     orgs = lib.mapAttrs (_: count: { inherit count; }) organizations;
@@ -76,7 +74,6 @@ in
       PrivateDevices = false;
     };
   };
-
   programs.nix-ld = {
     enable = true;
     # Playwright's downloaded Chromium.
@@ -107,52 +104,58 @@ in
       pango
     ];
   };
-
   virtualisation.docker.autoPrune.enable = true;
-
+  systemd = {
+    # tonistiigi/binfmt registers QEMU from a privileged container, which only
+    # outlives the container when the host has binfmt_misc mounted.
+    mounts = [
+      {
+        what = "binfmt_misc";
+        where = "/proc/sys/fs/binfmt_misc";
+        type = "binfmt_misc";
+        wantedBy = [ "sysinit.target" ];
+      }
+    ];
+    services = builtins.listToAttrs (
+      builtins.map (runner: {
+        name = "github-runner-${runner}";
+        value = lib.mkMerge [
+          {
+            serviceConfig.User = runner;
+            environment = {
+              GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
+              # The runner defaults to node20 for hashFiles() and actions that
+              # declare it, and only node24 is shipped.
+              ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION = "node24";
+              FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
+            };
+          }
+          (lib.mkIf (lib.elem runner shellhubRunners) {
+            # The docker group must stay mapped for the socket to be reachable.
+            serviceConfig = {
+              SupplementaryGroups = [ "docker" ];
+              PrivateUsers = false;
+            };
+            path = with pkgs; [
+              wineWowPackages.stable
+              yarn
+            ];
+          })
+        ];
+      }) runners
+    );
+  };
   nix.settings = {
     allowed-users = runners;
     trusted-users = runners;
   };
-
   boot.runSize = "75%";
-
   swapDevices = [
     {
       device = "/var/lib/swapfile";
       size = 16384;
     }
   ];
-
-  systemd.services = builtins.listToAttrs (
-    builtins.map (runner: {
-      name = "github-runner-${runner}";
-      value = lib.mkMerge [
-        {
-          serviceConfig.User = runner;
-          environment = {
-            GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
-            # The runner defaults to node20 for hashFiles() and actions that
-            # declare it, and only node24 is shipped.
-            ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION = "node24";
-            FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
-          };
-        }
-        (lib.mkIf (lib.elem runner shellhubRunners) {
-          # The docker group must stay mapped for the socket to be reachable.
-          serviceConfig = {
-            SupplementaryGroups = [ "docker" ];
-            PrivateUsers = false;
-          };
-          path = with pkgs; [
-            wineWowPackages.stable
-            yarn
-          ];
-        })
-      ];
-    }) runners
-  );
-
   sops = {
     defaultSopsFile = ../../../secrets/octocat.yaml;
     secrets.github-app-runner-private-key = { };
