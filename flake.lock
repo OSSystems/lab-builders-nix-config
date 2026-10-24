@@ -267,6 +267,29 @@
         "type": "github"
       }
     },
+    "microvm-github-runners": {
+      "inputs": {
+        "microvm": [
+          "microvm"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792880010,
+        "narHash": "sha256-qyKdgbVj5xB/RpBt0aSvfXtPcBjTjvSSA9QrmTbSfJ8=",
+        "owner": "OSSystems",
+        "repo": "microvm-github-runners",
+        "rev": "dc25ee44e80d1e76e147a156d39d19ab1294deb5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "OSSystems",
+        "repo": "microvm-github-runners",
+        "type": "github"
+      }
+    },
     "nix-github-actions": {
       "inputs": {
         "nixpkgs": [
@@ -447,6 +470,7 @@
         "disko": "disko",
         "home-manager": "home-manager",
         "microvm": "microvm",
+        "microvm-github-runners": "microvm-github-runners",
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-github-runners": "nixpkgs-github-runners",

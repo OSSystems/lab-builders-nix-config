@@ -94,26 +94,5 @@
         pango
       ];
     };
-
-    virtualisation.docker.enable = true;
-
-    systemd = {
-      # Compose driven as a Go library (testcontainers) only finds the CLI
-      # plugins in the standard directories, not through the docker wrapper.
-      tmpfiles.rules = [
-        "L+ /usr/libexec/docker/cli-plugins/docker-buildx - - - - ${pkgs.docker-buildx}/libexec/docker/cli-plugins/docker-buildx"
-        "L+ /usr/libexec/docker/cli-plugins/docker-compose - - - - ${pkgs.docker-compose}/libexec/docker/cli-plugins/docker-compose"
-      ];
-      # tonistiigi/binfmt registers QEMU from a privileged container, which only
-      # outlives the container when binfmt_misc is mounted.
-      mounts = [
-        {
-          what = "binfmt_misc";
-          where = "/proc/sys/fs/binfmt_misc";
-          type = "binfmt_misc";
-          wantedBy = [ "sysinit.target" ];
-        }
-      ];
-    };
   };
 }

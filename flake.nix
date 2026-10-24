@@ -52,6 +52,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    microvm-github-runners = {
+      url = "github:OSSystems/microvm-github-runners";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        microvm.follows = "microvm";
+      };
+    };
+
     attic = {
       url = "github:zhaofengli/attic";
       inputs.nixpkgs.follows = "nixpkgs";
