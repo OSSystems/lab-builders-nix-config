@@ -1,6 +1,7 @@
-# shellhub-io runners as one throwaway microVM per job. Each boot gets a fresh
-# disk and a just-in-time runner config minted here, so the GitHub App key
-# never enters a VM and nothing outlives the job.
+# shellhub-io runners as one throwaway microVM per job. octocat-scaleset boots
+# VMs from the pool while the host has room, each with a fresh disk and a
+# just-in-time runner config, so the GitHub App key never enters a VM and
+# nothing outlives the job.
 {
   inputs,
   config,
@@ -13,91 +14,98 @@ let
   bridge = "microbr";
   subnet = "10.231.0";
   hostAddress = "${subnet}.1";
-  mirrorPort = 5000;
-  org = "shellhub-io";
+  nixDaemonPort = 5000;
+  poolSize = 8;
+  vmMemGiB = 10;
+  octocat-scaleset = import ../../packages/octocat-scaleset { inherit pkgs; };
 
-  vms = {
-    octocat-microvm-1 = {
-      index = 1;
-      labels = [ "octocat-microvm" ];
-    };
-  };
-
-  appToken = "${inputs.nixpkgs-github-runners}/nixos/modules/services/continuous-integration/github-runner/app-token.sh";
-
-  mintJitConfig = pkgs.writeShellApplication {
-    name = "mint-jit-config";
-    runtimeInputs = with pkgs; [
-      bash
-      coreutils
-      curl
-      jq
-      openssl
-    ];
-    text = ''
-      name=$1
-      labels=$2
-      out=$3
-
-      token=$(APP_ID=4080784 APP_LOGIN=${org} \
-        APP_PRIVATE_KEY=$(<${config.sops.secrets.github-app-runner-private-key.path}) \
-        bash ${appToken})
-
-      jq -n --arg name "$name-$(date +%s)" --argjson labels "$labels" \
-        '{name: $name, runner_group_id: 1, labels: $labels, work_folder: "_work"}' |
-        curl -fsS -X POST \
-          -H "Authorization: Bearer $token" \
-          -H "Accept: application/vnd.github+json" \
-          -H "X-GitHub-Api-Version: 2022-11-28" \
-          --data @- \
-          https://api.github.com/orgs/${org}/actions/runners/generate-jitconfig |
-        jq -er .encoded_jit_config >"$out.tmp"
-      chmod 0400 "$out.tmp"
-      mv "$out.tmp" "$out"
-    '';
-  };
+  slots = builtins.genList (i: {
+    name = "octocat-microvm-${toString (i + 1)}";
+    index = i + 1;
+  }) poolSize;
+  slotNames = map (s: s.name) slots;
 in
 {
   imports = [ inputs.microvm.nixosModules.host ];
 
-  microvm.vms = lib.mapAttrs (name: vm: {
-    restartIfChanged = true;
-    specialArgs = { inherit inputs; };
-    config = {
-      imports = [
-        ./job-environment.nix
-        ./microvm-runner-guest.nix
-      ];
-      octocat.microvm = {
-        inherit hostAddress mirrorPort name;
-        address = "${subnet}.${toString (10 + vm.index)}";
-        mac = "02:00:0a:e7:00:${lib.fixedWidthString 2 "0" (lib.toHexString vm.index)}";
-        tap = "vm-shrun${toString vm.index}";
+  microvm.vms = lib.listToAttrs (
+    map (slot: {
+      inherit (slot) name;
+      value = {
+        # octocat-scaleset starts VMs on demand; a deploy must not kill a
+        # running job, the next boot picks up the new system.
+        autostart = false;
+        restartIfChanged = false;
+        specialArgs = { inherit inputs; };
+        config = {
+          imports = [
+            ./job-environment.nix
+            ./microvm-runner-guest.nix
+          ];
+          octocat.microvm = {
+            inherit (slot) name;
+            inherit hostAddress nixDaemonPort;
+            address = "${subnet}.${toString (10 + slot.index)}";
+            mac = "02:00:0a:e7:00:${lib.fixedWidthString 2 "0" (lib.toHexString slot.index)}";
+            tap = "vm-shrun${toString slot.index}";
+            cid = 2 + slot.index;
+            mem = vmMemGiB * 1024;
+          };
+        };
       };
+    }) slots
+  );
+
+  users = {
+    users.microvm-nix = {
+      isSystemUser = true;
+      group = "microvm-nix";
     };
-  }) vms;
+    groups.microvm-nix = { };
+  };
+  # Guests build through the host daemon as this untrusted user, so builds and
+  # their cache land in the host store while guests only see it read-only.
+  nix.settings.allowed-users = [ "microvm-nix" ];
 
   systemd = {
-    services = lib.mapAttrs' (
-      name: vm:
-      lib.nameValuePair "microvm@${name}" {
-        serviceConfig.ExecStartPre = [
-          "+${lib.getExe mintJitConfig} ${name} ${
-            lib.escapeShellArg (
-              builtins.toJSON (
-                [
-                  "self-hosted"
-                  "Linux"
-                  "X64"
-                ]
-                ++ vm.labels
-              )
-            )
-          } /run/microvm-jit/${name}/jitconfig"
-        ];
-      }
-    ) vms;
-    tmpfiles.rules = lib.mapAttrsToList (name: _: "d /run/microvm-jit/${name} 0700 root root -") vms;
+    services = {
+      octocat-scaleset = {
+        wantedBy = [ "multi-user.target" ];
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+        path = [ config.systemd.package ];
+        serviceConfig = {
+          ExecStart = lib.escapeShellArgs [
+            (lib.getExe octocat-scaleset)
+            "--url=https://github.com/shellhub-io"
+            "--name=octocat-microvm"
+            "--labels=octocat-microvm"
+            "--app-id=4080784"
+            "--private-key-file=${config.sops.secrets.github-app-runner-private-key.path}"
+            "--slots=${lib.concatStringsSep "," slotNames}"
+            "--vm-mem=${toString vmMemGiB}"
+          ];
+          Restart = "always";
+          RestartSec = "10s";
+        };
+      };
+
+      microvm-nix-daemon = {
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+          ExecStart = "${lib.getExe pkgs.socat} VSOCK-LISTEN:${toString nixDaemonPort},fork,reuseaddr UNIX-CONNECT:/nix/var/nix/daemon-socket/socket";
+          User = "microvm-nix";
+          Group = "microvm-nix";
+          Restart = "always";
+        };
+      };
+    }
+    // lib.genAttrs (map (n: "microvm@${n}") slotNames) (_: {
+      # A VM powers off after its one job and waits for octocat-scaleset.
+      serviceConfig.Restart = lib.mkForce "no";
+    });
+
+    tmpfiles.rules = map (n: "d /run/microvm-jit/${n} 0750 root kvm -") slotNames;
 
     network = {
       enable = true;
@@ -137,14 +145,11 @@ in
       internalInterfaces = [ bridge ];
       externalInterface = "enp6s0";
     };
+    # Guests reach the internet, nothing on the host or the lab network.
     firewall = {
-      interfaces.${bridge}.allowedTCPPorts = [ mirrorPort ];
-      # Guests reach the internet and the registry mirror, nothing else on the
-      # host or the lab network.
       extraCommands = ''
         iptables -N microvm-in 2>/dev/null || iptables -F microvm-in
         iptables -A microvm-in -m conntrack --ctstate ESTABLISHED,RELATED -j RETURN
-        iptables -A microvm-in -p tcp --dport ${toString mirrorPort} -j RETURN
         iptables -A microvm-in -j DROP
         iptables -D INPUT -i ${bridge} -j microvm-in 2>/dev/null || true
         iptables -I INPUT -i ${bridge} -j microvm-in
@@ -161,14 +166,5 @@ in
         iptables -D FORWARD -i ${bridge} -j microvm-fwd 2>/dev/null || true
       '';
     };
-  };
-
-  # Docker Hub pull-through cache. Pushes are rejected in proxy mode, so guests
-  # can only read from it.
-  services.dockerRegistry = {
-    enable = true;
-    listenAddress = "0.0.0.0";
-    port = mirrorPort;
-    extraConfig.proxy.remoteurl = "https://registry-1.docker.io";
   };
 }
