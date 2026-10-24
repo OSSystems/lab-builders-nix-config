@@ -1,5 +1,5 @@
 # A shellhub-io runner VM: runs one job with the just-in-time config the host
-# minted for this boot, then powers off.
+# handed it for this boot, then powers off.
 {
   config,
   lib,
@@ -19,12 +19,16 @@ in
       "mac"
       "tap"
     ] (_: lib.mkOption { type = lib.types.str; })
-    // {
-      mirrorPort = lib.mkOption { type = lib.types.port; };
-    };
+    // lib.genAttrs [
+      "cid"
+      "mem"
+      "nixDaemonPort"
+    ] (_: lib.mkOption { type = lib.types.int; });
 
   config = {
     system.stateVersion = "26.05";
+    # systemd picks up the JIT config from fw_cfg before the root is mounted.
+    boot.initrd.kernelModules = [ "qemu_fw_cfg" ];
     networking = {
       hostName = cfg.name;
       useDHCP = false;
@@ -32,7 +36,8 @@ in
     microvm = {
       hypervisor = "qemu";
       vcpu = 8;
-      mem = 16384;
+      inherit (cfg) mem;
+      vsock.cid = cfg.cid;
       interfaces = [
         {
           type = "tap";
@@ -48,14 +53,8 @@ in
           mountPoint = "/nix/.ro-store";
           readOnly = true;
         }
-        {
-          proto = "virtiofs";
-          tag = "jit";
-          source = "/run/microvm-jit/${cfg.name}";
-          mountPoint = "/run/jit";
-          readOnly = true;
-        }
       ];
+      credentialFiles.jitconfig = "/run/microvm-jit/${cfg.name}/jitconfig";
       # Docker data, the runner workspace and home all live here, and the image
       # is deleted before every boot.
       volumes = [
@@ -80,51 +79,68 @@ in
           ];
         };
       };
-      services.github-runner = {
-        wantedBy = [ "multi-user.target" ];
-        wants = [ "network-online.target" ];
-        after = [
-          "network-online.target"
-          "docker.service"
-        ];
-        path =
-          config.octocat.jobPackages
-          ++ (with pkgs; [
-            bash
-            findutils
-            git
-            gnugrep
-            gnused
-            gnutar
-            gzip
-            sudo
-            wineWowPackages.stable
-            yarn
-          ]);
-        environment = {
-          RUNNER_ROOT = "/var/lib/github-runner";
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
+      sockets.nix-daemon-proxy = {
+        wantedBy = [ "sockets.target" ];
+        socketConfig = {
+          ListenStream = "/nix/var/nix/daemon-socket/socket";
+          Accept = true;
         };
-        unitConfig = {
-          SuccessAction = "poweroff";
-          FailureAction = "poweroff";
+      };
+      services = {
+        "nix-daemon-proxy@".serviceConfig = {
+          ExecStart = "${lib.getExe pkgs.socat} STDIO VSOCK-CONNECT:2:${toString cfg.nixDaemonPort}";
+          StandardInput = "socket";
         };
-        serviceConfig = {
-          User = "runner";
-          StateDirectory = "github-runner";
-          WorkingDirectory = "/var/lib/github-runner";
-          LoadCredential = "jitconfig:/run/jit/jitconfig";
-          ExecStart = pkgs.writeShellScript "github-runner-jit" ''
-            exec ${config.octocat.runnerPackage}/bin/Runner.Listener run \
-              --jitconfig "$(<"$CREDENTIALS_DIRECTORY/jitconfig")"
-          '';
-          KillSignal = "SIGINT";
+        github-runner = {
+          wantedBy = [ "multi-user.target" ];
+          wants = [ "network-online.target" ];
+          after = [
+            "network-online.target"
+            "docker.service"
+          ];
+          path =
+            config.octocat.jobPackages
+            ++ (with pkgs; [
+              bash
+              findutils
+              git
+              gnugrep
+              gnused
+              gnutar
+              gzip
+              sudo
+              wineWowPackages.stable
+              yarn
+            ]);
+          environment = {
+            RUNNER_ROOT = "/var/lib/github-runner";
+            FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
+            inherit (config.environment.variables) NIX_CONFIG NIX_REMOTE;
+          };
+          unitConfig = {
+            SuccessAction = "poweroff";
+            FailureAction = "poweroff";
+          };
+          serviceConfig = {
+            User = "runner";
+            StateDirectory = "github-runner";
+            WorkingDirectory = "/var/lib/github-runner";
+            ImportCredential = "jitconfig";
+            ExecStart = pkgs.writeShellScript "github-runner-jit" ''
+              exec ${config.octocat.runnerPackage}/bin/Runner.Listener run \
+                --jitconfig "$(<"$CREDENTIALS_DIRECTORY/jitconfig")"
+            '';
+            KillSignal = "SIGINT";
+          };
         };
       };
     };
-    virtualisation.docker.daemon.settings = {
-      registry-mirrors = [ "http://${cfg.hostAddress}:${toString cfg.mirrorPort}" ];
-      insecure-registries = [ "${cfg.hostAddress}:${toString cfg.mirrorPort}" ];
+    # Nix talks to the host's daemon over vsock; the store itself is the
+    # host's, read-only.
+    nix.enable = false;
+    environment.variables = {
+      NIX_REMOTE = "daemon";
+      NIX_CONFIG = "experimental-features = nix-command flakes";
     };
     users.users.runner = {
       isNormalUser = true;
