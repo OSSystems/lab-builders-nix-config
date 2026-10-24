@@ -16,11 +16,9 @@ let
 
   githubRunnerModules = "${inputs.nixpkgs-github-runners}/nixos/modules/services/continuous-integration/github-runner";
 
-  runners = lib.concatLists (
-    lib.mapAttrsToList (
-      org: count: builtins.genList (x: "${prefix}-${org}-${toString (x + 1)}") count
-    ) organizations
-  );
+  runnersOf = org: builtins.genList (x: "${prefix}-${org}-${toString (x + 1)}") organizations.${org};
+  runners = lib.concatMap runnersOf (builtins.attrNames organizations);
+  dockerRunners = runnersOf "shellhub-io";
 in
 {
   imports = [
@@ -45,6 +43,7 @@ in
       bats
       cachix
       config.nix.package
+      config.virtualisation.docker.package
       coreutils
       curl
       diffutils
@@ -74,6 +73,8 @@ in
 
   programs.nix-ld.enable = true;
 
+  virtualisation.docker.autoPrune.enable = true;
+
   nix.settings = {
     allowed-users = runners;
     trusted-users = runners;
@@ -92,7 +93,14 @@ in
     builtins.map (runner: {
       name = "github-runner-${runner}";
       value = {
-        serviceConfig.User = runner;
+        serviceConfig = {
+          User = runner;
+        }
+        # The docker group must stay mapped for the socket to be reachable.
+        // lib.optionalAttrs (lib.elem runner dockerRunners) {
+          SupplementaryGroups = [ "docker" ];
+          PrivateUsers = false;
+        };
         environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
       };
     }) runners
