@@ -1,4 +1,5 @@
-# shellhub-io jobs run in throwaway microVMs; see
+# Jobs run in throwaway microVMs from one pool shared by all organizations,
+# so one that is idle leaves its VMs to the others; see
 # https://github.com/OSSystems/microvm-github-runners.
 {
   inputs,
@@ -12,7 +13,11 @@
 
   services.microvm-github-runners = {
     enable = true;
-    url = "https://github.com/shellhub-io";
+    urls = [
+      "https://github.com/shellhub-io"
+      "https://github.com/OSSystems"
+      "https://github.com/GarniHQ"
+    ];
     name = "octocat-microvm";
     githubApp = {
       id = "4080784";
