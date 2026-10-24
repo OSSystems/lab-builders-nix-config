@@ -16,11 +16,9 @@ let
 
   githubRunnerModules = "${inputs.nixpkgs-github-runners}/nixos/modules/services/continuous-integration/github-runner";
 
-  runners = lib.concatLists (
-    lib.mapAttrsToList (
-      org: count: builtins.genList (x: "${prefix}-${org}-${toString (x + 1)}") count
-    ) organizations
-  );
+  runnersOf = org: builtins.genList (x: "${prefix}-${org}-${toString (x + 1)}") organizations.${org};
+  runners = lib.concatMap runnersOf (builtins.attrNames organizations);
+  shellhubRunners = runnersOf "shellhub-io";
 in
 {
   imports = [
@@ -39,19 +37,27 @@ in
       id = 4080784;
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
-    nodeRuntimes = [ "node24" ];
+    nodeRuntimes = [
+      "node20"
+      "node24"
+    ];
     extraLabels = [ "nix" ];
     extraPackages = with pkgs; [
       bats
       cachix
       config.nix.package
+      config.virtualisation.docker.package
       coreutils
       curl
       diffutils
       file
       gawk
+      gcc
       gh
       glibc.bin
+      gnumake
+      gnupatch
+      gnupg
       inetutils
       jq
       nix-eval-jobs
@@ -60,11 +66,13 @@ in
       openssl
       procps
       python3
+      rsync
       shellcheck
       unzip
       util-linux
       which
       xz
+      zip
     ];
     serviceOverrides = {
       DeviceAllow = [ "/dev/kvm" ];
@@ -72,7 +80,48 @@ in
     };
   };
 
-  programs.nix-ld.enable = true;
+  # The runner evaluates hashFiles() with its node20 external, which is past
+  # end of life.
+  nixpkgs.config.allowInsecurePredicate =
+    pkg:
+    lib.elem (lib.getName pkg) [
+      "nodejs"
+      "nodejs-slim"
+    ]
+    && lib.versions.major (lib.getVersion pkg) == "20";
+
+  programs.nix-ld = {
+    enable = true;
+    # Playwright's downloaded Chromium.
+    libraries = with pkgs; [
+      alsa-lib
+      at-spi2-atk
+      at-spi2-core
+      atk
+      cairo
+      cups
+      dbus
+      expat
+      glib
+      gtk3
+      libdrm
+      libgbm
+      libx11
+      libxcb
+      libxcomposite
+      libxdamage
+      libxext
+      libxfixes
+      libxkbcommon
+      libxrandr
+      mesa
+      nspr
+      nss
+      pango
+    ];
+  };
+
+  virtualisation.docker.autoPrune.enable = true;
 
   nix.settings = {
     allowed-users = runners;
@@ -91,10 +140,23 @@ in
   systemd.services = builtins.listToAttrs (
     builtins.map (runner: {
       name = "github-runner-${runner}";
-      value = {
-        serviceConfig.User = runner;
-        environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
-      };
+      value = lib.mkMerge [
+        {
+          serviceConfig.User = runner;
+          environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
+        }
+        (lib.mkIf (lib.elem runner shellhubRunners) {
+          # The docker group must stay mapped for the socket to be reachable.
+          serviceConfig = {
+            SupplementaryGroups = [ "docker" ];
+            PrivateUsers = false;
+          };
+          path = with pkgs; [
+            wineWowPackages.stable
+            yarn
+          ];
+        })
+      ];
     }) runners
   );
 
