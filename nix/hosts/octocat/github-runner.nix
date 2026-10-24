@@ -10,7 +10,6 @@ let
   prefix = "octocat-runner";
   organizations = {
     OSSystems = 3;
-    shellhub-io = 9;
     GarniHQ = 9;
   };
 
@@ -18,7 +17,6 @@ let
 
   runnersOf = org: builtins.genList (x: "${prefix}-${org}-${toString (x + 1)}") organizations.${org};
   runners = lib.concatMap runnersOf (builtins.attrNames organizations);
-  shellhubRunners = runnersOf "shellhub-io";
 in
 {
   imports = [
@@ -61,17 +59,6 @@ in
               FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
             };
           }
-          (lib.mkIf (lib.elem runner shellhubRunners) {
-            # The docker group must stay mapped for the socket to be reachable.
-            serviceConfig = {
-              SupplementaryGroups = [ "docker" ];
-              PrivateUsers = false;
-            };
-            path = with pkgs; [
-              wineWowPackages.stable
-              yarn
-            ];
-          })
         ];
       }) runners
     );
