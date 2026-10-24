@@ -35,7 +35,13 @@ in
       id = 4080784;
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
-    nodeRuntimes = [ "node24" ];
+    # hashFiles() always runs the runner's node20 external, so that slot is
+    # filled with node24 instead of the end-of-life Node 20.
+    package = pkgs.github-runner.override { nodejs_20 = pkgs.nodejs_24; };
+    nodeRuntimes = [
+      "node20"
+      "node24"
+    ];
     extraLabels = [ "nix" ];
     extraPackages = with pkgs; [
       bats
@@ -122,13 +128,7 @@ in
         value = lib.mkMerge [
           {
             serviceConfig.User = runner;
-            environment = {
-              GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
-              # The runner defaults to node20 for hashFiles() and actions that
-              # declare it, and only node24 is shipped.
-              ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION = "node24";
-              FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
-            };
+            environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
           }
           (lib.mkIf (lib.elem runner shellhubRunners) {
             # The docker group must stay mapped for the socket to be reachable.
