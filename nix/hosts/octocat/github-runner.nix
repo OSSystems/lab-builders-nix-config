@@ -128,7 +128,10 @@ in
         value = lib.mkMerge [
           {
             serviceConfig.User = runner;
-            environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
+            environment = {
+              GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
+              FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
+            };
           }
           (lib.mkIf (lib.elem runner shellhubRunners) {
             # The docker group must stay mapped for the socket to be reachable.
