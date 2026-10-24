@@ -130,7 +130,13 @@ in
       value = lib.mkMerge [
         {
           serviceConfig.User = runner;
-          environment.GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
+          environment = {
+            GIT_SSH_COMMAND = "ssh -i $HOME/.ssh/id_rsa";
+            # The runner defaults to node20 for hashFiles() and actions that
+            # declare it, and only node24 is shipped.
+            ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION = "node24";
+            FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
+          };
         }
         (lib.mkIf (lib.elem runner shellhubRunners) {
           # The docker group must stay mapped for the socket to be reachable.
