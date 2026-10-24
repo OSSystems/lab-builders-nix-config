@@ -25,6 +25,7 @@ in
     inputs.sops-nix.nixosModules.default
     "${githubRunnerModules}/options.nix"
     "${githubRunnerModules}/service.nix"
+    ./job-environment.nix
   ];
   disabledModules = [ "services/continuous-integration/github-runners.nix" ];
   services.github-runners.${prefix} = {
@@ -35,99 +36,20 @@ in
       id = 4080784;
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
-    # hashFiles() always runs the runner's node20 external, so that slot is
-    # filled with node24 instead of the end-of-life Node 20.
-    package = pkgs.github-runner.override { nodejs_20 = pkgs.nodejs_24; };
+    package = config.octocat.runnerPackage;
     nodeRuntimes = [
       "node20"
       "node24"
     ];
     extraLabels = [ "nix" ];
-    extraPackages = with pkgs; [
-      bats
-      cachix
-      config.nix.package
-      config.virtualisation.docker.package
-      coreutils
-      curl
-      diffutils
-      file
-      gawk
-      gcc
-      gh
-      glibc.bin
-      gnumake
-      gnupatch
-      gnupg
-      inetutils
-      jq
-      nix-eval-jobs
-      nodejs_24
-      openssh
-      openssl
-      procps
-      python3
-      rsync
-      shellcheck
-      unzip
-      util-linux
-      which
-      xz
-      zip
-    ];
+    extraPackages = config.octocat.jobPackages;
     serviceOverrides = {
       DeviceAllow = [ "/dev/kvm" ];
       PrivateDevices = false;
     };
   };
-  programs.nix-ld = {
-    enable = true;
-    # Playwright's downloaded Chromium.
-    libraries = with pkgs; [
-      alsa-lib
-      at-spi2-atk
-      at-spi2-core
-      atk
-      cairo
-      cups
-      dbus
-      expat
-      glib
-      gtk3
-      libdrm
-      libgbm
-      libx11
-      libxcb
-      libxcomposite
-      libxdamage
-      libxext
-      libxfixes
-      libxkbcommon
-      libxrandr
-      mesa
-      nspr
-      nss
-      pango
-    ];
-  };
   virtualisation.docker.autoPrune.enable = true;
   systemd = {
-    # Compose driven as a Go library (testcontainers) only finds the CLI
-    # plugins in the standard directories, not through the docker wrapper.
-    tmpfiles.rules = [
-      "L+ /usr/libexec/docker/cli-plugins/docker-buildx - - - - ${pkgs.docker-buildx}/libexec/docker/cli-plugins/docker-buildx"
-      "L+ /usr/libexec/docker/cli-plugins/docker-compose - - - - ${pkgs.docker-compose}/libexec/docker/cli-plugins/docker-compose"
-    ];
-    # tonistiigi/binfmt registers QEMU from a privileged container, which only
-    # outlives the container when the host has binfmt_misc mounted.
-    mounts = [
-      {
-        what = "binfmt_misc";
-        where = "/proc/sys/fs/binfmt_misc";
-        type = "binfmt_misc";
-        wantedBy = [ "sysinit.target" ];
-      }
-    ];
     services = builtins.listToAttrs (
       builtins.map (runner: {
         name = "github-runner-${runner}";
