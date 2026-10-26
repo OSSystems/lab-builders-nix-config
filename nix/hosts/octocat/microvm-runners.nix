@@ -24,9 +24,11 @@
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
     network.externalInterface = "enp6s0";
-    # VMs hold only the memory their job uses, so they may be given 30% more
-    # than octocat has; zram absorbs the rare moment all of them peak.
-    memOvercommit = 0.3;
+    # Keep 10 GiB for memory-heavy jobs. Allow up to ten VMs, with each boot
+    # batch also limited by MemAvailable above the 8 GiB host reserve.
+    vm.memGiB = 10;
+    memReserveGiB = 8;
+    memOvercommit = 1.0;
     poolSize = 16;
     guestModules = [
       ./job-environment.nix
