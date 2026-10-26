@@ -277,11 +277,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792887298,
-        "narHash": "sha256-Zw882HQOrZywtQrrswe6+BLgkxuaWZmNYZ6uIh9lEF0=",
+        "lastModified": 1793051380,
+        "narHash": "sha256-gZ+yCEMs7FkqtSwuborD9OV07UsAmeGDFirI3/lELbs=",
         "owner": "OSSystems",
         "repo": "microvm-github-runners",
-        "rev": "a8975e0e4a63f3dd145b1f6f0074959b529a9b82",
+        "rev": "7d9a115fb905b84bd2a3acbb0f6abf9dbbc2cf18",
         "type": "github"
       },
       "original": {
