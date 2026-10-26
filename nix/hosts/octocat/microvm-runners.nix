@@ -43,6 +43,8 @@
               ]);
             environment.FORCE_JAVASCRIPT_ACTIONS_TO_NODE24 = "true";
           };
+          # Actions written for other runners use a #!/bin/bash shebang.
+          systemd.tmpfiles.rules = [ "L+ /bin/bash - - - - ${pkgs.bashInteractive}/bin/bash" ];
         }
       )
     ];
