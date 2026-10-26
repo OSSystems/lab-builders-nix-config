@@ -35,8 +35,6 @@
         # envsubst, which sigstore/cosign-installer calls.
         gettext
         gh
-        # GitHub-hosted runners ship Go, so some jobs call it without setup-go.
-        go
         glibc.bin
         gnumake
         gnupatch
