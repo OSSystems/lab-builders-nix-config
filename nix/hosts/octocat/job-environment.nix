@@ -32,6 +32,8 @@
         file
         gawk
         gcc
+        # envsubst, which sigstore/cosign-installer calls.
+        gettext
         gh
         glibc.bin
         gnumake
