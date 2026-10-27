@@ -50,7 +50,6 @@
       enable = true;
       floorGiB = 8;
       headroomGiB = 2;
-      canarySlot = "octocat-microvm-1";
     };
     poolSize = 16;
     guestModules = [
