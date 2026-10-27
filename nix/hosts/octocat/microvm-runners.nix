@@ -45,6 +45,8 @@
       cpuWeight = 100;
       cpuQuotaPercent = null;
     };
+    # CPU weights share busy processors; allow the configured vCPUs to contend.
+    maxLoadPerCpu = 4.0;
     memReserveGiB = 8;
     memCommitRatio = 2.0;
     balloon = {
