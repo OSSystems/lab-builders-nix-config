@@ -5,6 +5,7 @@
   inputs,
   config,
   pkgs,
+  lib,
   ...
 }:
 
@@ -35,11 +36,22 @@
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
     network.externalInterface = "enp6s0";
-    # Keep 10 GiB for memory-heavy jobs. Allow up to sixteen VMs, with each boot
-    # batch also limited by MemAvailable above the 8 GiB host reserve.
-    vm.memGiB = 10;
+    # Keep 16 reusable slots. Actual concurrency is bounded by host headroom
+    # and a nominal RAM commitment of twice the host RAM after its reserve.
+    vm = {
+      memGiB = 10;
+      vcpu = 8;
+      cpuWeight = 100;
+      cpuQuotaPercent = null;
+    };
     memReserveGiB = 8;
-    memOvercommit = 1.0;
+    memCommitRatio = 2.0;
+    balloon = {
+      enable = true;
+      floorGiB = 8;
+      headroomGiB = 2;
+      canarySlot = "octocat-microvm-1";
+    };
     poolSize = 16;
     guestModules = [
       ./job-environment.nix
@@ -63,6 +75,8 @@
     ];
   };
 
+  # CI builds use the host daemon and must compete fairly with VM workloads.
+  nix.daemonCPUSchedPolicy = lib.mkForce "other";
   virtualisation.docker.autoPrune.enable = true;
   boot.runSize = "75%";
   swapDevices = [
