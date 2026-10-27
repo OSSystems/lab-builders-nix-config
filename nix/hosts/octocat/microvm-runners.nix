@@ -39,7 +39,7 @@
     # Keep 16 reusable slots. Actual concurrency is bounded by host headroom
     # and a nominal RAM commitment of twice the host RAM after its reserve.
     vm = {
-      memGiB = 10;
+      memGiB = 16;
       vcpu = 8;
       cpuWeight = 100;
       cpuQuotaPercent = null;
