@@ -1,5 +1,4 @@
-# What CI jobs find on octocat, shared by the host runners and the microVM
-# runners.
+# What CI jobs find in octocat's microVM runners.
 {
   config,
   lib,

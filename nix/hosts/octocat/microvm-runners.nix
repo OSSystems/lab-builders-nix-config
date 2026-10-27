@@ -9,7 +9,11 @@
 }:
 
 {
-  imports = [ inputs.microvm-github-runners.nixosModules.default ];
+  imports = [
+    inputs.microvm-github-runners.nixosModules.default
+    inputs.sops-nix.nixosModules.default
+    ./job-environment.nix
+  ];
 
   services.microvm-github-runners = {
     enable = true;
@@ -19,12 +23,19 @@
       "https://github.com/GarniHQ"
     ];
     name = "octocat-microvm";
+    labels = [
+      "octocat-microvm"
+      "self-hosted"
+      "Linux"
+      "X64"
+      "nix"
+    ];
     githubApp = {
       id = "4080784";
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
     network.externalInterface = "enp6s0";
-    # Keep 10 GiB for memory-heavy jobs. Allow up to ten VMs, with each boot
+    # Keep 10 GiB for memory-heavy jobs. Allow up to sixteen VMs, with each boot
     # batch also limited by MemAvailable above the 8 GiB host reserve.
     vm.memGiB = 10;
     memReserveGiB = 8;
@@ -50,5 +61,18 @@
         }
       )
     ];
+  };
+
+  virtualisation.docker.autoPrune.enable = true;
+  boot.runSize = "75%";
+  swapDevices = [
+    {
+      device = "/var/lib/swapfile";
+      size = 16384;
+    }
+  ];
+  sops = {
+    defaultSopsFile = ../../../secrets/octocat.yaml;
+    secrets.github-app-runner-private-key = { };
   };
 }
