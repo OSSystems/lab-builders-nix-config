@@ -5,17 +5,34 @@ on:
     paths:
       - '**.nix'
       - 'flake.lock'
+      - 'scripts/check-flake'
+      - '.github/workflows/ci.yaml'
   push:
     branches: [ master ]
     paths:
       - '**.nix'
       - 'flake.lock'
+      - 'scripts/check-flake'
+      - '.github/workflows/ci.yaml'
 
 jobs:
   ci:
     runs-on: self-hosted
     steps:
-      - uses: ossystems/nix-actions@v1
+      - name: Prepare Nix and private inputs
+        uses: ossystems/nix-actions@v1
         with:
-          checks: true
+          flake-check: false
+          build-hosts: false
+          build-devshells: false
+          build-packages: false
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Check outputs in separate evaluators
+        run: scripts/check-flake
+      - name: Build hosts, packages, and development shells
+        uses: ossystems/nix-actions@v1
+        with:
+          checkout: false
+          install-nix: false
+          flake-check: false
+          checks: true
