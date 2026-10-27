@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+"""Run flake checks without retaining every host's evaluated module graph."""
+
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+
+
+def output(*args):
+    return subprocess.check_output(args, text=True).strip()
+
+
+root = Path(output("git", "rev-parse", "--show-toplevel"))
+revision = output("git", "rev-parse", "HEAD")
+source = f"git+{root.as_uri()}?rev={revision}&shallow=1"
+system = output("nix", "config", "show", "system")
+manifest = json.loads(output(
+    "nix", "eval", "--json", "--expr", """
+    let
+      flake = builtins.getFlake @SOURCE@;
+      system = @SYSTEM@;
+    in {
+      groups = builtins.listToAttrs (map (group: {
+        name = group;
+        value = builtins.attrNames ((flake.${group} or {}).${system} or {});
+      }) [ "packages" "checks" "devShells" "apps" ]);
+      hosts = builtins.attrNames (flake.nixosConfigurations or {});
+      formatter = builtins.hasAttr system (flake.formatter or {});
+    }
+    """.replace("@SOURCE@", json.dumps(source)).replace("@SYSTEM@", json.dumps(system)),
+))
+selections = [("", "")]
+selections += [(group, name) for group, names in manifest["groups"].items() for name in names]
+selections += [("nixosConfigurations", name) for name in manifest["hosts"]]
+if manifest["formatter"]:
+    selections.append(("formatter", ""))
+
+with tempfile.TemporaryDirectory(prefix="flake-check-") as directory:
+    wrapper = Path(directory)
+    template = Path(__file__).resolve().parents[1] / ".github" / "flake-check" / "flake.nix"
+    shutil.copyfile(template, wrapper / "flake.nix")
+    for group, name in selections:
+        label = ".".join(part for part in (group, name) if part) or "metadata and modules"
+        print(f"Checking {label}", flush=True)
+        (wrapper / "selection.json").write_text(json.dumps({
+            "output": group, "system": system, "name": name,
+        }))
+        result = subprocess.run([
+            "nix", "flake", "check", str(wrapper), "--no-write-lock-file",
+            "--override-input", "source", source,
+        ])
+        if result.returncode:
+            raise SystemExit(result.returncode)
