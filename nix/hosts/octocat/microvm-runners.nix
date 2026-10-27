@@ -40,6 +40,7 @@
     # and a nominal RAM commitment of twice the host RAM after its reserve.
     vm = {
       memGiB = 16;
+      initialMemGiB = 2;
       vcpu = 8;
       cpuWeight = 100;
       cpuQuotaPercent = null;
@@ -48,8 +49,8 @@
     memCommitRatio = 2.0;
     balloon = {
       enable = true;
-      floorGiB = 8;
-      headroomGiB = 2;
+      floorGiB = 2;
+      headroomGiB = 1;
     };
     poolSize = 16;
     guestModules = [
