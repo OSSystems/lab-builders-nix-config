@@ -18,6 +18,7 @@ in
     ++ [
       ../features/required
       ../features/zram-swap.nix
+      ../features/yocto-cache-cleanup
       ./partitioning.nix
     ];
   boot = {
