@@ -37,25 +37,8 @@
       privateKeyFile = config.sops.secrets.github-app-runner-private-key.path;
     };
     network.externalInterface = "enp6s0";
-    # Keep 16 reusable slots. Actual concurrency is bounded by host headroom
-    # and a nominal RAM commitment of twice the host RAM after its reserve.
-    vm = {
-      memGiB = 16;
-      initialMemGiB = 2;
-      vcpu = 8;
-      cpuWeight = 100;
-      cpuQuotaPercent = null;
-    };
-    # CPU weights share busy processors; allow the configured vCPUs to contend.
+    # CPU weights share busy processors.
     maxLoadPerCpu = 4.0;
-    memReserveGiB = 8;
-    memCommitRatio = 2.0;
-    balloon = {
-      enable = true;
-      floorGiB = 2;
-      headroomGiB = 1;
-    };
-    poolSize = 16;
     guestModules = [
       ./job-environment.nix
       (
