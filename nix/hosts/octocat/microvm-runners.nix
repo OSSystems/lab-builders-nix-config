@@ -56,6 +56,11 @@
           };
           # Actions written for other runners use a #!/bin/bash shebang.
           systemd.tmpfiles.rules = [ "L+ /bin/bash - - - - ${pkgs.bashInteractive}/bin/bash" ];
+          # Absorb allocation spikes while the host hotplugs more guest memory.
+          zramSwap = {
+            enable = true;
+            memoryPercent = 100;
+          };
         }
       )
     ];
