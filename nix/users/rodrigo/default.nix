@@ -163,7 +163,7 @@
           settings = {
             user = {
               name = "Rodrigo M. Duarte";
-              email = "rodrigo.duarte@ossystems.com.br";
+              email = "rodrigo.duarte@ossystems.tech";
             };
             core = {
               sshCommand = "${pkgs.openssh}/bin/ssh -F ~/.ssh/config";
