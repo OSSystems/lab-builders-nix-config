@@ -13,6 +13,7 @@
       ../features/zram-swap.nix
       ./partitioning.nix
       ./microvm-runners.nix
+      ./t3code-os.nix
     ];
 
   boot = {

@@ -59,6 +59,9 @@
       url = "github:zhaofengli/attic";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Not on our nixpkgs: its patched T3 Code build is tested on its own.
+    t3code-nix.url = "github:OSSystems/t3code-nix";
   };
 
   outputs =
