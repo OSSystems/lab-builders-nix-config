@@ -30,4 +30,15 @@
     };
     kernelModules = [ "kvm-amd" ];
   };
+
+  # Keeps usage history for `sar`. CI jobs come in bursts of minutes, so
+  # sample each minute.
+  services.sysstat = {
+    enable = true;
+    collect-frequency = "*:*:00";
+  };
+  # Above 28 days, sa2 moves the data files into monthly directories.
+  environment.etc."sysconfig/sysstat".text = ''
+    HISTORY=28
+  '';
 }
