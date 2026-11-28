@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   imports =
@@ -14,7 +14,6 @@
       ./partitioning.nix
       ./microvm-runners.nix
     ];
-
   boot = {
     loader = {
       systemd-boot.enable = true;
@@ -30,15 +29,18 @@
     };
     kernelModules = [ "kvm-amd" ];
   };
-
   # Keeps usage history for `sar`. CI jobs come in bursts of minutes, so
   # sample each minute.
   services.sysstat = {
     enable = true;
     collect-frequency = "*:*:00";
   };
-  # Above 28 days, sa2 moves the data files into monthly directories.
-  environment.etc."sysconfig/sysstat".text = ''
-    HISTORY=28
-  '';
+  environment = {
+    # The sysstat module runs the collector but does not install `sar`.
+    systemPackages = [ pkgs.sysstat ];
+    # Above 28 days, sa2 moves the data files into monthly directories.
+    etc."sysconfig/sysstat".text = ''
+      HISTORY=28
+    '';
+  };
 }
